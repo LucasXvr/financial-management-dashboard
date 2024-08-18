@@ -1,5 +1,6 @@
 using Fin.Api;
 using Fin.Api.Common.Api;
+using Fin.Api.Endpoints;
 using Fin.Core;
 
 var builder = WebApplication.CreateBuilder(args);
