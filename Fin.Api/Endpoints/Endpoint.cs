@@ -15,7 +15,6 @@ namespace Fin.Api.Endpoints
             endpoints.MapGroup("/")
             .WithTags("Health Check")
             .MapGet("/", () => new { message = "OK" });
-
         }
 
         private static IEndpointRouteBuilder MapEndpoint<TEndpoint>(this IEndpointRouteBuilder app)
