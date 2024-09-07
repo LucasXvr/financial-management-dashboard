@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Fin.Api.Data;
-// using Fin.Api.Handlers;
+using Fin.Api.Handlers;
 using Fin.Api.Models;
 using Fin.Core;
-// using Fin.Core.Handlers;
+using Fin.Core.Handlers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 // using Stripe;
@@ -79,9 +79,9 @@ namespace Fin.Api.Common.Api
             //     .Services
             //     .AddTransient<ICategoryHandler, CategoryHandler>();
 
-            // builder
-            //     .Services
-            //     .AddTransient<ITransactionHandler, TransactionHandler>();
+            builder
+                .Services
+                .AddTransient<ITransactionHandler, TransactionHandler>();
 
             // builder
             //     .Services
