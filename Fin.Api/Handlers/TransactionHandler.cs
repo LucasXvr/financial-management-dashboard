@@ -15,7 +15,6 @@ namespace Fin.Api.Handlers
 {
     public class TransactionHandler(AppDbContext context) : ITransactionHandler
     {
-
         public async Task<Response<Transaction?>> CreateAsync(CreateTransactionRequest request)
         {
             if (request is { Type: ETransactionType.Withdraw, Amount: >= 0 })

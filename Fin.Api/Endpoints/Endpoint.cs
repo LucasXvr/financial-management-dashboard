@@ -11,24 +11,25 @@ namespace Fin.Api.Endpoints
     {
         public static void MapEndpoints(this WebApplication app)
         {
-            var endpoints = app.MapGroup("");
+            var endpoints = app
+            .MapGroup("");
 
             endpoints.MapGroup("/")
-            .WithTags("Health Check")
-            .MapGet("/", () => new { message = "OK" });
+                .WithTags("Health Check")
+                .MapGet("/", () => new { message = "OK" });
 
             endpoints.MapGroup("v1/transactions")
                 .WithTags("Transactions")
                 .RequireAuthorization()
-                .MapEndpoint<CreateTransactionEndpoint>();
-            // .MapEndpoint<UpdateTransactionEndpoint>()
-            // .MapEndpoint<DeleteTransactionEndpoint>()
-            // .MapEndpoint<GetTransactionByIdEndpoint>()
-            // .MapEndpoint<GetTransactionsByPeriodEndpoint>();
+                .MapEndpoint<CreateTransactionEndpoint>()
+                .MapEndpoint<UpdateTransactionEndpoint>()
+                .MapEndpoint<DeleteTransactionEndpoint>()
+                .MapEndpoint<GetTransactionByIdEndpoint>()
+                .MapEndpoint<GetTransactionsByPeriodEndpoint>();
         }
 
         private static IEndpointRouteBuilder MapEndpoint<TEndpoint>(this IEndpointRouteBuilder app)
-        where TEndpoint : IEndpoint
+            where TEndpoint : IEndpoint
         {
             TEndpoint.Map(app);
             return app;

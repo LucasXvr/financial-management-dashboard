@@ -9,29 +9,31 @@ using Fin.Core.Models;
 using Fin.Core.Requests.Transactions;
 using Fin.Core.Responses;
 
-
 namespace Fin.Api.Endpoints.Transactions
 {
-    public class CreateTransactionEndpoint : IEndpoint
+    public class UpdateTransactionEndpoint : IEndpoint
     {
         public static void Map(IEndpointRouteBuilder app)
-            => app.MapPost("/", HandleAsync)
-                .WithName("Transactions: Create")
-                .WithSummary("Cria uma nova transação")
-                .WithDescription("Cria uma nova transação")
-                .WithOrder(1)
+            => app.MapPut("/{id}", HandleAsync)
+                .WithName("Transactions: Update")
+                .WithSummary("Atualiza uma transação")
+                .WithDescription("Atualiza uma transação")
+                .WithOrder(2)
                 .Produces<Response<Transaction?>>();
 
         private static async Task<IResult> HandleAsync(
             ClaimsPrincipal user,
             ITransactionHandler handler,
-            CreateTransactionRequest request)
+            UpdateTransactionRequest request,
+            long id)
         {
             request.UserId = user.Identity?.Name ?? string.Empty;
-            var result = await handler.CreateAsync(request);
+            request.Id = id;
+
+            var result = await handler.UpdateAsync(request);
             return result.IsSuccess
-                ? TypedResults.Created($"/{result.Data?.Id}", result)
-                : TypedResults.BadRequest(result.Data);
+                ? TypedResults.Ok(result)
+                : TypedResults.BadRequest(result);
         }
     }
 }

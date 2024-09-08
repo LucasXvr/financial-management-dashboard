@@ -9,13 +9,13 @@ using Fin.Core;
 using Fin.Core.Handlers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-// using Stripe;
 
 namespace Fin.Api.Common.Api
 {
     public static class BuilderExtension
     {
-        public static void AddConfiguration(this WebApplicationBuilder builder)
+        public static void AddConfiguration(
+            this WebApplicationBuilder builder)
         {
             Configuration.ConnectionString =
                 builder
