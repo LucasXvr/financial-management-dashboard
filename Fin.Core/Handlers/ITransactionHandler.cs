@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Transactions;
+using Fin.Core.Models;
 using Fin.Core.Requests.Transactions;
 using Fin.Core.Responses;
 

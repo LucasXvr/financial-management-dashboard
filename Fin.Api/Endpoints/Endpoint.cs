@@ -21,7 +21,7 @@ namespace Fin.Api.Endpoints
             endpoints.MapGroup("v1/transactions")
                 .WithTags("Transactions")
                 .RequireAuthorization()
-                .MapEndpoint<CreateTransactionEndpoint>()
+                // .MapEndpoint<CreateTransactionEndpoint>()
                 .MapEndpoint<UpdateTransactionEndpoint>()
                 .MapEndpoint<DeleteTransactionEndpoint>()
                 .MapEndpoint<GetTransactionByIdEndpoint>()
