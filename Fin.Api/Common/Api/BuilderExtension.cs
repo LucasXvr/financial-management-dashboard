@@ -23,7 +23,7 @@ namespace Fin.Api.Common.Api
                     .GetConnectionString("DefaultConnection")
                 ?? string.Empty;
             Configuration.BackendUrl = builder.Configuration.GetValue<string>("BackendUrl") ?? string.Empty;
-            // Configuration.FrontendUrl = builder.Configuration.GetValue<string>("FrontendUrl") ?? string.Empty;
+            Configuration.FrontendUrl = builder.Configuration.GetValue<string>("FrontendUrl") ?? string.Empty;
             // ApiConfiguration.StripeApiKey = builder.Configuration.GetValue<string>("StripeApiKey") ?? string.Empty;
 
             // StripeConfiguration.ApiKey = ApiConfiguration.StripeApiKey;
@@ -65,7 +65,7 @@ namespace Fin.Api.Common.Api
                     policy => policy
                         .WithOrigins([
                             Configuration.BackendUrl,
-                        Configuration.FrontendUrl
+                            Configuration.FrontendUrl
                         ])
                         .AllowAnyMethod()
                         .AllowAnyHeader()
@@ -75,13 +75,13 @@ namespace Fin.Api.Common.Api
 
         public static void AddServices(this WebApplicationBuilder builder)
         {
-            // builder
-            //     .Services
-            //     .AddTransient<ICategoryHandler, CategoryHandler>();
+            builder
+                .Services
+                .AddTransient<ICategoryHandler, CategoryHandler>();
 
-            // builder
-            //     .Services
-            //     .AddTransient<ITransactionHandler, TransactionHandler>();
+            builder
+                .Services
+                .AddTransient<ITransactionHandler, TransactionHandler>();
 
             // builder
             //     .Services

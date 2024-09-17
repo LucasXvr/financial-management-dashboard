@@ -6,26 +6,25 @@ using System.Threading.Tasks;
 using Fin.Api.Common.Api;
 using Fin.Core.Handlers;
 using Fin.Core.Models;
-using Fin.Core.Requests.Transactions;
+using Fin.Core.Requests.Categories;
 using Fin.Core.Responses;
 
-
-namespace Fin.Api.Endpoints.Transactions
+namespace Fin.Api.Endpoints.Categories
 {
-    public class CreateTransactionEndpoint : IEndpoint
+    public class CreateCategoryEndpoint : IEndpoint
     {
         public static void Map(IEndpointRouteBuilder app)
         => app.MapPost("/", HandleAsync)
-            .WithName("Transactions: Create")
-            .WithSummary("Cria uma nova transação")
-            .WithDescription("Cria uma nova transação")
+            .WithName("Categories: Create")
+            .WithSummary("Cria uma nova categoria")
+            .WithDescription("Cria uma nova categoria")
             .WithOrder(1)
-            .Produces<Response<Transaction?>>();
+            .Produces<Response<Category?>>();
 
         private static async Task<IResult> HandleAsync(
             ClaimsPrincipal user,
-            ITransactionHandler handler,
-            CreateTransactionRequest request)
+            ICategoryHandler handler,
+            CreateCategoryRequest request)
         {
             request.UserId = user.Identity?.Name ?? string.Empty;
             var result = await handler.CreateAsync(request);
