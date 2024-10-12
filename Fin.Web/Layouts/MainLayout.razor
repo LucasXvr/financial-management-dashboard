@@ -4,41 +4,31 @@
 <MudSnackbarProvider />
 <MudDialogProvider />
 
-<AuthorizeView>
-    <Authorized>
-        <MudLayout>
-            <MudAppBar>
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
-                    OnClick="ToggleDrawer" />
-                FinTrack
-                <MudSpacer />
-                <MudButton Href="/lancamentos/novo" Variant="Variant.Text" StartIcon="@Icons.Material.TwoTone.Add">
-                    NOVO LANÇAMENTO
-                </MudButton>
-                <MudSpacer />
-                @* <MudText Typo="Typo.caption">
-                @context.User.Identity?.Name
-                </MudText> *@
-                <MudSwitch Color="Color.Inherit" @bind-Value="@_isDarkMode" T="bool" Class="ma-4"
-                    ThumbIcon="@Icons.Material.TwoTone.Lightbulb" />
-            </MudAppBar>
-            <MudDrawer @bind-Open="@_isDrawerOpened">
-                <NavMenu />
-            </MudDrawer>
-            <MudMainContent>
-                <MudContainer Class="mt-4">
-                    @Body
-                </MudContainer>
-            </MudMainContent>
-        </MudLayout>
-    </Authorized>
-    <NotAuthorized>
-        <LoginRedirect />
-    </NotAuthorized>
-</AuthorizeView>
+<MudLayout>
+    <MudAppBar Color="Color.Primary">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+            OnClick="ToggleDrawer" />
+        <MudText Typo="Typo.h6" Class="ml-2">FinTrack</MudText>
+        <MudSpacer />
+        <MudButton Href="/lancamentos/novo" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Add">
+            NOVO LANÇAMENTO
+        </MudButton>
+        <MudSpacer />
+        <MudSwitch Color="Color.Primary" @bind-Value="_isDarkMode" ThumbIcon="@Icons.Material.Filled.Brightness4" />
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="@_isDrawerOpened">
+        <NavMenu />
+    </MudDrawer>
+
+    <MudMainContent>
+        <MudContainer Class="mt-4">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
 
 @code {
-
     private bool _isDrawerOpened = true;
     private bool _isDarkMode = true;
     private MudThemeProvider _mudThemeProvider = null!;
@@ -60,7 +50,5 @@
         return Task.CompletedTask;
     }
 
-    private void ToggleDrawer()
-    => _isDrawerOpened = !_isDrawerOpened;
-
+    private void ToggleDrawer() => _isDrawerOpened = !_isDrawerOpened;
 }

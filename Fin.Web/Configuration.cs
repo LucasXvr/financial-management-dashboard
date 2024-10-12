@@ -21,14 +21,25 @@ namespace Fin.Web
                     FontFamily = ["Raleway", "sans-serif"]
                 }
             },
-            PaletteDark = new PaletteDark
+            PaletteLight = new PaletteLight()
             {
-                Primary = Colors.LightGreen.Accent3,
-                Secondary = Colors.LightGreen.Darken3,
-                // Background = Colors.LightGreen.Darken4,
-                AppbarBackground = Colors.LightGreen.Accent3,
-                AppbarText = Colors.Shades.Black,
-                PrimaryContrastText = new MudColor("#000000")
+                Primary = Colors.Blue.Default,
+                Secondary = Colors.Red.Default,
+                Background = "#f5f5f5",
+                AppbarBackground = Colors.Blue.Darken3,
+                DrawerBackground = "#ffffff",
+                TextPrimary = "#333333",
+                TextSecondary = "#666666"
+            },
+            PaletteDark = new PaletteDark()
+            {
+                Primary = Colors.LightBlue.Accent3,
+                Secondary = Colors.DeepOrange.Accent2,
+                Background = "#212121",
+                AppbarBackground = "#424242",
+                DrawerBackground = "#333333",
+                TextPrimary = "#ffffff",
+                TextSecondary = "#b0bec5"
             }
         };
     }

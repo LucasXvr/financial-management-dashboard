@@ -2,6 +2,118 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="flex-1 p-8 @(_isDarkMode ? "text-gray-200" : "text-gray-800")">
+    <h2 class="text-3xl font-bold mb-6">Dashboard</h2>
 
-Welcome to your new app.
+    <!-- Summary Cards -->
+    <MudGrid>
+        <MudItem xs="12" sm="4"> <!-- Cada card ocupa 4 colunas em telas pequenas e acima -->
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Current Balance</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="fa-solid fa-chevron-down" Color="Color.Default" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudText>$12,750</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="4"> <!-- Cada card ocupa 4 colunas em telas pequenas e acima -->
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Total Income</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="fa-solid fa-chevron-down" Color="Color.Default" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudText>$21,500</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="12" sm="4"> <!-- Cada card ocupa 4 colunas em telas pequenas e acima -->
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Total Expenses</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="fa-solid fa-chevron-down" Color="Color.Default" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudText>$8,750</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Charts -->
+    <MudCard class="mt-6">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h5" Align="Align.Center">Income vs Expenses</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <div>
+                <MudChart ChartType="ChartType.Line" ChartSeries="@Series" @bind-SelectedIndex="Index"
+                    XAxisLabels="@XAxisLabels" Width="100%" Height="350px" ChartOptions="@Options" />
+                <MudGrid>
+                    <MudItem xs="6">
+                        <MudText Typo="Typo.body1" Class="py-3">Selected: @(Index < 0 ? "None" : Series[Index].Name)
+                        </MudText>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudSlider @bind-Value="Options.LineStrokeWidth" Min="1" Max="10" Color="Color.Info">
+                            Line Width: @Options.LineStrokeWidth.ToString()
+                        </MudSlider>
+                    </MudItem>
+                </MudGrid>
+            </div>
+        </MudCardContent>
+    </MudCard>
+
+    <MudCard class="mt-6 mb-6">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h5" Align="Align.Center">Monthly Overview</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+
+        <div>
+            <MudChart ChartType="ChartType.Bar" ChartSeries="@Series" @bind-SelectedIndex="Index"
+                XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
+        </div>
+    </MudCard>
+</div>
+
+@code {
+    private bool _isDarkMode = false;
+    private string _language = "en";
+
+    private void ToggleDarkMode()
+    {
+        _isDarkMode = !_isDarkMode;
+    }
+
+    private void ChangeLanguage(string lang)
+    {
+        _language = lang;
+        // Implement language change logic
+    }
+    private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
+    public ChartOptions Options = new ChartOptions();
+    public List<ChartSeries> Series = new List<ChartSeries>()
+{
+new ChartSeries() { Name = "Income", Data = new double[] { 90, 79, 72, 69, 62, 62, 55, 65, 70 } },
+new ChartSeries() { Name = "Expenses", Data = new double[] { 10, 41, 35, 51, 49, 62, 69, 91, 148 } },
+};
+    public string[] XAxisLabels = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep" };
+}
