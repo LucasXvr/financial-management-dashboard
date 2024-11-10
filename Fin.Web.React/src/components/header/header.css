@@ -1,0 +1,49 @@
+/* Container geral do header */
+header {
+  background-color: #003b16; /* Cor de fundo */
+  color: #ffffff; /* Cor do texto */
+  padding: 20px 0; /* Padding superior e inferior */
+}
+
+/* Container interno para alinhar o conteúdo */
+.header-container {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Alinha os itens ao centro horizontalmente */
+  text-align: center; /* Centraliza o texto */
+}
+
+/* Título do header */
+.header-title {
+  font-size: 2rem; /* Tamanho do título */
+  font-weight: bold;
+}
+
+/* Navegação */
+nav {
+  margin-top: 20px; /* Espaço acima da navegação */
+}
+
+.nav-links {
+  list-style-type: none; /* Remove os pontos da lista */
+  padding: 0;
+  display: flex; /* Exibe os itens de navegação em linha */
+  justify-content: center; /* Centraliza os itens de navegação */
+}
+
+.nav-links li {
+  margin: 0 15px; /* Espaçamento entre os itens */
+}
+
+.nav-links a {
+  color: #ffffff; /* Cor dos links */
+  text-decoration: none; /* Remove o sublinhado */
+  font-size: 18px; /* Tamanho da fonte */
+  transition: color 0.3s ease; /* Transição suave para o hover */
+}
+
+.nav-links a:hover {
+  color: #b3cbb5; /* Cor ao passar o mouse */
+}

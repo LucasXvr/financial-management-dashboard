@@ -1,0 +1,41 @@
+/* global.css */
+
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Cores Globais */
+:root {
+  --primary-color: #003b16; /* Cor verde escura */
+  --secondary-color: #b3cbb5; /* Cor verde clara */
+  --background-color: #ffffff; /* Cor de fundo */
+  --text-color: #003b16; /* Cor de texto */
+}
+
+/* Corpo do documento */
+body {
+  font-family: Arial, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* Links */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--secondary-color);
+}
+
+/* Classe para Dark Mode */
+.dark {
+  --background-color: #121212;
+  --text-color: #ffffff;
+  --primary-color: #b3cbb5;
+}
