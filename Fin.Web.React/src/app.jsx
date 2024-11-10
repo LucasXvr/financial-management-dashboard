@@ -14,7 +14,7 @@ function App() {
        <div className="App bg-gray-100 dark:bg-gray-900 min-h-screen">
         <Header/>
         <Routes>
-          <Route path="/" element={< Dashboard/>}></Route>
+          <Route path="/" element={<Dashboard to="/" replace/>}></Route>
         </Routes>
        </div>
     </Router>
