@@ -1,7 +1,6 @@
 import React from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { DollarSign, TrendingUp, CreditCard, PieChart } from 'lucide-react';
-import './dashboard.css';
 
 const balanceData = [
     { month: 'Jan', balance: 5000 },
