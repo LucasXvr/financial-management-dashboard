@@ -14,9 +14,12 @@ export default function Header() {
   return (
     <header className="bg-green-950 text-white p-4">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold">FinTrack</h1>
+        <Link to="/" className="flex items-center">
+          <img src="/icone.png" alt="MF logo" className='h-12 w-auto mr-2'/>
+        </Link>
+        
         <nav className="flex items-center space-x-4">
-          <Link to="/dashboard" className={`flex items-center ${location.pathname === '/dashboard' ? 'text-green-300' : ''}`}>
+          <Link to="/" className={`flex items-center ${location.pathname === '/dashboard' ? 'text-green-300' : ''}`}>
             <PieChart className="mr-1" size={20} />
             Dashboard
           </Link>
