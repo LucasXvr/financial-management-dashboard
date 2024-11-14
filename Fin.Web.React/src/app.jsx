@@ -3,6 +3,7 @@ import "./styles/global.css"
 import Dashboard from './pages/dashboard.jsx';
 import Header from "./components/header.jsx";
 import Transactions from './pages/transactions.jsx';
+import Budget from './pages/budget.jsx';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard to="/" replace/>}></Route>
           <Route path="/transactions" element={<Transactions to="/transactions"/>}></Route>
+          <Route path="/budget" element={<Budget to="/budget"/>}></Route>
         </Routes>
        </div>
     </Router>
