@@ -5,14 +5,22 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction }) => {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
+  const [type, setType] = useState('1'); // Receita como padrão
+  const [categoryId, setCategoryId] = useState(''); // Pode ser um campo opcional
+  const userId = 'user-id-123'; // Substitua pelo ID do usuário autenticado
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     onAddTransaction({
-      description,
+      userId,
+      title: description,
+      type: parseInt(type),
       amount: parseFloat(amount),
-      date,
+      categoryId: parseInt(categoryId) || 0, // Se não for obrigatório, default 0
+      paidOrReceivedAt: date,
     });
+
     onClose();
   };
 
@@ -65,6 +73,33 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction }) => {
               onChange={(e) => setDate(e.target.value)}
               className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
               required
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Tipo
+            </label>
+            <select
+              id="type"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+              required
+            >
+              <option value="1">Receita</option>
+              <option value="2">Despesa</option>
+            </select>
+          </div>
+          <div className="mb-4">
+            <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Categoria (opcional)
+            </label>
+            <input
+              type="number"
+              id="categoryId"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             />
           </div>
           <div className="flex justify-end">
