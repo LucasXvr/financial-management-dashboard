@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Filter } from 'lucide-react';
 import AddTransactionModal from '../components/addTransactionModal';
 
 const Transactions = () => {
@@ -26,46 +26,47 @@ const Transactions = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
         Transações
       </h2>
-      <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 justify-start">
-        {/* Input de Pesquisa */}
-        <div className="relative">
+      <div className="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        <div className="relative flex-grow">
           <input
             type="text"
             placeholder="Pesquisar transações..."
-            className="pl-10 pr-4 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="w-full pl-10 pr-4 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
         </div>
 
-        {/* Seletor */}
-        <select
-          name="transactionFilter"
-          id="transactionFilter"
-          className="pl-3 pr-10 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-        >
-          <option value="all">Todas</option>
-          <option value="income">Receitas</option>
-          <option value="expense">Despesas</option>
-        </select>
+        <div className="flex gap-4">
+          <div className="relative flex-grow sm:flex-grow-0">
+            <select
+              name="transactionFilter"
+              id="transactionFilter"
+              className="w-full appearance-none pl-3 pr-10 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            >
+              <option value="all">Todas</option>
+              <option value="income">Receitas</option>
+              <option value="expense">Despesas</option>
+            </select>
+            <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
+          </div>
 
-        {/* Botão Adicionar */}
-        <button
-          className="bg-green-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md flex items-center hover:bg-green-800 dark:hover:bg-blue-600 transition-colors"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <Plus size={20} className="mr-2" />
-          Adicionar
-        </button>
+          <button
+            className="flex-grow sm:flex-grow-0 bg-green-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <Plus size={20} className="mr-2" />
+            Adicionar
+          </button>
+        </div>
       </div>
 
-      {/* Tabela */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-700">
             <tr>
