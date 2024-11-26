@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { PieChart, DollarSign, Wallet, Sun, Moon, Bell, Search } from 'lucide-react';
+import { PieChart, DollarSign, Wallet, Sun, Moon, Bell, AlignJustify } from 'lucide-react';
 
 export default function Header() {
   const [darkMode, setDarkMode] = useState(false);
@@ -24,21 +24,36 @@ export default function Header() {
 
   return (
     <header className="bg-green-950 dark:bg-gray-800 text-white p-4 transition-colors duration-200">
-      <div className="container mx-auto flex items-center justify-between">
+      <div className="container mx-auto flex flex-wrap items-center justify-between">
         <Link to="/" className="flex items-center">
-          <img src="/logotipo.png" alt="MF Logo" className="h-10 w-auto mr-2" />
+          <img src="/logotipo.png" alt="MF Logo" className="h-8 w-auto mr-2 sm:h-10" />
         </Link>
-        <button
-          className="block lg:hidden p-2 rounded-full hover:bg-green-700 dark:hover:bg-gray-700 focus:outline-none"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          <Search size={20} />
-        </button>
+        <div className="flex items-center lg:hidden">
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 rounded-full hover:bg-green-700 dark:hover:bg-gray-700 transition-colors focus:outline-none mr-2"
+            aria-label={darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}
+          >
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          <button
+            className="p-2 rounded-full hover:bg-green-700 dark:hover:bg-gray-700 transition-colors focus:outline-none mr-2"
+            aria-label="Notificações"
+          >
+            <Bell size={18} />
+          </button>
+          <button
+            className="p-2 rounded-full hover:bg-green-700 dark:hover:bg-gray-700 focus:outline-none"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <AlignJustify size={18} />
+          </button>
+        </div>
         <nav
           className={`${
             isMenuOpen ? 'flex' : 'hidden'
-          } lg:flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6`}
+          } w-full lg:flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6 mt-4 lg:mt-0 lg:w-auto`}
         >
           <Link
             to="/"
@@ -46,8 +61,8 @@ export default function Header() {
               location.pathname === '/dashboard' ? 'text-green-300' : ''
             }`}
           >
-            <PieChart className="mr-1" size={20} />
-            Dashboard
+            <PieChart className="mr-1" size={18} />
+            <span className="text-sm sm:text-base">Dashboard</span>
           </Link>
           <Link
             to="/transactions"
@@ -55,8 +70,8 @@ export default function Header() {
               location.pathname === '/transactions' ? 'text-green-300' : ''
             }`}
           >
-            <DollarSign className="mr-1" size={20} />
-            Transações
+            <DollarSign className="mr-1" size={18} />
+            <span className="text-sm sm:text-base">Transações</span>
           </Link>
           <Link
             to="/budget"
@@ -64,22 +79,24 @@ export default function Header() {
               location.pathname === '/budget' ? 'text-green-300' : ''
             }`}
           >
-            <Wallet className="mr-1" size={20} />
-            Orçamento
+            <Wallet className="mr-1" size={18} />
+            <span className="text-sm sm:text-base">Orçamento</span>
           </Link>
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 rounded-full hover:bg-green-700 dark:hover:bg-gray-700 transition-colors focus:outline-none"
-            aria-label={darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}
-          >
-            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
-          <button
-            className="p-2 rounded-full hover:bg-green-700 dark:hover:bg-gray-700 transition-colors focus:outline-none"
-            aria-label="Notificações"
-          >
-            <Bell size={20} />
-          </button>
+          <div className="hidden lg:flex items-center">
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-full hover:bg-green-700 dark:hover:bg-gray-700 transition-colors focus:outline-none"
+              aria-label={darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}
+            >
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button
+              className="p-2 rounded-full hover:bg-green-700 dark:hover:bg-gray-700 transition-colors focus:outline-none ml-2"
+              aria-label="Notificações"
+            >
+              <Bell size={18} />
+            </button>
+          </div>
         </nav>
       </div>
     </header>
