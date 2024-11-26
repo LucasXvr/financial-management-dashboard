@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Search } from 'lucide-react';
-import AddTransactionModal from '../components/addTransactionModal'; // Ajuste o caminho conforme necessário
+import AddTransactionModal from '../components/addTransactionModal';
 
 const Transactions = () => {
   const [searchTerm, setSearchTerm] = useState('');

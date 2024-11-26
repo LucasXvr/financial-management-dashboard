@@ -5,9 +5,9 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction }) => {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
-  const [type, setType] = useState('1'); // Receita como padrão
-  const [categoryId, setCategoryId] = useState(''); // Pode ser um campo opcional
-  const userId = 'user-id-123'; // Substitua pelo ID do usuário autenticado
+  const [type, setType] = useState('1'); 
+  const [categoryId, setCategoryId] = useState('');
+  const userId = 'user-id-123';
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -17,7 +17,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction }) => {
       title: description,
       type: parseInt(type),
       amount: parseFloat(amount),
-      categoryId: parseInt(categoryId) || 0, // Se não for obrigatório, default 0
+      categoryId: parseInt(categoryId) || 0,
       paidOrReceivedAt: date,
     });
 
