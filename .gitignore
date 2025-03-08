@@ -128,4 +128,21 @@ $RECYCLE.BIN/
 .idea/
 *.sln.iml
 
+# Docker files
+# Ignore Docker containers, volumes, and images
+.docker/
+docker-compose.override.yml
+docker-compose.*.yml
+*.dockerignore
+Dockerfile
+.docker-compose*.*
+
+# Ignore files for Docker build output
+**/Dockerfile.*
+**/*.tar
+**/*.tar.gz
+**/*.tgz
+**/image_*.tar
+**/docker-compose*.yml
+
 # End of `.gitignore` file.
