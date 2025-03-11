@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
-import { Plus, Search, Filter } from 'lucide-react';
+import { Plus, Search, Filter, Link } from 'lucide-react';
 import AddTransactionModal from '../components/addTransactionModal';
+import AddCategoryModal from '../components/addCategoryModal';
 
 const Transactions = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [transactions, setTransactions] = useState([
-    { id: 1, description: 'Supermercado', date: '2023-06-15', amount: -250 },
-    { id: 2, description: 'Salário', date: '2023-06-01', amount: 5000 },
-    { id: 3, description: 'Aluguel', date: '2023-06-05', amount: -1200 },
-    { id: 4, description: 'Freelance', date: '2023-06-20', amount: 1500 },
-    { id: 5, description: 'Conta de luz', date: '2023-06-10', amount: -150 },
+    { id: 1, description: 'Supermercado', category: 'Alimentação', date: '2023-06-15', amount: -250 },
+    { id: 2, description: 'Salário', category: 'Renda', date: '2023-06-01', amount: 5000 },
+    { id: 3, description: 'Aluguel', category: 'Moradia', date: '2023-06-05', amount: -1200 },
+    { id: 4, description: 'Freelance', category: 'Renda Extra', date: '2023-06-20', amount: 1500 },
+    { id: 5, description: 'Conta de luz', category: 'Contas Fixas', date: '2023-06-10', amount: -150 },
   ]);
 
+  const categories = ['Alimentação', 'Renda', 'Moradia', 'Renda Extra', 'Contas Fixas'];
+
   const filteredTransactions = transactions.filter(transaction =>
-    transaction.description.toLowerCase().includes(searchTerm.toLowerCase())
+    transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (categoryFilter === 'all' || transaction.category === categoryFilter)
   );
 
   const handleAddTransaction = (newTransaction) => {
@@ -48,20 +55,53 @@ const Transactions = () => {
               name="transactionFilter"
               id="transactionFilter"
               className="w-full appearance-none pl-3 pr-10 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <option value="all">Todas</option>
-              <option value="income">Receitas</option>
-              <option value="expense">Despesas</option>
+              {categories.map(category => (
+                <option key={category} value={category}>{category}</option>
+              ))}
             </select>
             <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
           </div>
 
           <button
             className="flex-grow sm:flex-grow-0 bg-green-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => setShowMenu(!showMenu)}
           >
             <Plus size={20} className="mr-2" />
             Adicionar
+          </button>
+
+          {showMenu && (
+            <div className="absolute bg-white dark:bg-gray-700 shadow-lg rounded-md mt-2 w-48 z-10">
+              <button
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+                onClick={() => {
+                  setIsTransactionModalOpen(true);
+                  setShowMenu(false);
+                }}
+              >
+                Nova Transação
+              </button>
+              <button
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+                onClick={() => {
+                  setIsCategoryModalOpen(true);
+                  setShowMenu(false);
+                }}
+              >
+                Nova Categoria
+              </button>
+            </div>
+          )}
+
+          <button
+            onClick={() => window.location.href = '/categories'}
+            className="flex-grow sm:flex-grow-0 bg-green-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
+          >
+            Gerenciar Categorias
           </button>
         </div>
       </div>
@@ -77,6 +117,9 @@ const Transactions = () => {
                 Descrição
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                Categoria
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Valor
               </th>
             </tr>
@@ -90,10 +133,12 @@ const Transactions = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
                   {transaction.description}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  {transaction.category}
+                </td>
                 <td
-                  className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                    transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
-                  }`}
+                  className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                    }`}
                 >
                   {transaction.amount > 0 ? '+' : '-'} R$ {Math.abs(transaction.amount).toFixed(2)}
                 </td>
@@ -104,9 +149,14 @@ const Transactions = () => {
       </div>
 
       <AddTransactionModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isTransactionModalOpen}
+        onClose={() => setIsTransactionModalOpen(false)}
         onAddTransaction={handleAddTransaction}
+      />
+
+      <AddCategoryModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
       />
     </div>
   );
