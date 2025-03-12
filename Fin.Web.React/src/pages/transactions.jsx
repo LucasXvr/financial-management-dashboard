@@ -77,7 +77,7 @@ const Transactions = () => {
           {showMenu && (
             <div className="absolute bg-white dark:bg-gray-700 shadow-lg rounded-md mt-2 w-48 z-10">
               <button
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+                className="block w-full text-left px-4 py-2 bg-green-600 dark:bg-blue-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
                 onClick={() => {
                   setIsTransactionModalOpen(true);
                   setShowMenu(false);
@@ -86,7 +86,7 @@ const Transactions = () => {
                 Nova Transação
               </button>
               <button
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+                className="block w-full text-left px-4 py-2 bg-green-600 dark:bg-blue-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
                 onClick={() => {
                   setIsCategoryModalOpen(true);
                   setShowMenu(false);
