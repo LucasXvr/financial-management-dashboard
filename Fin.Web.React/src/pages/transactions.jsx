@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Plus, Search, Filter, Link } from 'lucide-react';
 import AddTransactionModal from '../components/addTransactionModal';
 import AddCategoryModal from '../components/addCategoryModal';
+import { useNavigate } from 'react-router-dom';
 
 const Transactions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showMenu, setShowMenu] = useState(false);
+  const navigate = useNavigate();
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -98,7 +100,7 @@ const Transactions = () => {
           )}
 
           <button
-            onClick={() => window.location.href = '/categories'}
+            onClick={() => navigate('/categories')}
             className="flex-grow sm:flex-grow-0 bg-green-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
           >
             Gerenciar Categorias
