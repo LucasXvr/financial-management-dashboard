@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AddCategoryModal from '../components/addCategoryModal';
-import { Edit, Edit2, Edit3, FileEdit, Pencil, Trash2 } from 'lucide-react';
+import { Edit2, Trash2 } from 'lucide-react';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -101,7 +101,7 @@ const Categories = () => {
           ))}
         </ul>
       </div>
-      
+
       <AddCategoryModal
         isOpen={isCategoryModalOpen}
         onClose={() => setIsCategoryModalOpen(false)}
