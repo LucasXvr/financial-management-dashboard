@@ -5,9 +5,9 @@ import AddCategoryModal from '../components/addCategoryModal';
 import { useNavigate } from 'react-router-dom';
 
 const Transactions = () => {
+  const navigate = useNavigate();  
   const [searchTerm, setSearchTerm] = useState('');
   const [showMenu, setShowMenu] = useState(false);
-  const navigate = useNavigate();
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -72,7 +72,7 @@ const Transactions = () => {
             className="flex-grow sm:flex-grow-0 bg-green-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
             onClick={() => setShowMenu(!showMenu)}
           >
-            <Plus size={20} className="mr-2" />
+            <Plus size={20} className="mr-2" />                                       
             Adicionar
           </button>
 

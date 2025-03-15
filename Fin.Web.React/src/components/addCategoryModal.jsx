@@ -1,25 +1,54 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { X } from 'lucide-react';
 
-const AddCategoryModal = ({ isOpen, onClose, onAddCategory }) => {
+const AddCategoryModal = ({ isOpen, onClose, onAddCategory, category, onEditCategory }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (category) {
+      setTitle(category.title);
+      setDescription(category.description || '');
+    }
+    else {
+      setTitle('');
+      setDescription('');
+    }
+  }, [category]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!title.trim()) return;
 
-    const newCategory = {
-      id: Date.now(), // Isso pode ser substituído pelo id gerado pela API
-      title,
-      description,
-    };
-
-    onAddCategory(newCategory);
-    setTitle('');
-    setDescription('');
-    onClose();
+    setLoading(true);
+    try {
+      if (category) {
+        const response = await axios.put(`http://localhost:5110/v1/categories/${category.id}`, {
+          title,
+          description,
+        });
+        onEditCategory(response.data.data);
+      }
+      else {
+        const response = await axios.post('http://localhost:5110/v1/categories', {
+          userId: '123', // 🔹 Mock temporário do usuário
+          title,
+          description,
+        });
+        onAddCategory(response.data.data);
+      }      
+            
+      setTitle('');
+      setDescription('');
+      onClose();
+    } catch (error) {
+      console.error('Erro ao adicionar categoria:', error);
+      alert('Erro ao adicionar categoria');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -28,7 +57,7 @@ const AddCategoryModal = ({ isOpen, onClose, onAddCategory }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Adicionar Categoria</h2>
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{category ? 'Editar Categoria' : 'Adicionar Categoria'}</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
             <X size={24} />
           </button>
@@ -66,9 +95,10 @@ const AddCategoryModal = ({ isOpen, onClose, onAddCategory }) => {
             </button>
             <button
               type="submit"
+              disabled={loading}
               className="flex-grow sm:flex-grow-0 bg-green-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
             >
-              Adicionar
+              {loading ? 'Salvando...' : category ? 'Editar' : 'Adicionar'}
             </button>
           </div>
         </form>

@@ -1,17 +1,58 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import AddCategoryModal from '../components/addCategoryModal';
+import { Edit, Edit2, Edit3, FileEdit, Pencil, Trash2 } from 'lucide-react';
 
 const Categories = () => {
-  const [categories, setCategories] = useState(['Alimentação', 'Renda', 'Moradia', 'Renda Extra', 'Contas Fixas']);
-  const [newCategory, setNewCategory] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
 
-  const handleAddCategory = () => {
-    setCategories([...categories, newCategory]);
-    setNewCategory('');
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get('http://localhost:5110/v1/categories', {
+        params: {
+          pageNumber: 1,
+          pageSize: 25,
+        }
+      });
+      setCategories(response.data.data);
+    } catch (error) {
+      console.error('Erro ao buscar categorias:', error);
+    }
   };
 
-  const handleDeleteCategory = (category) => {
-    setCategories(categories.filter(c => c !== category));
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleAddCategory = (newCategory) => {
+    setCategories((prevCategories) => [...prevCategories, newCategory]);
   };
+
+  const handleEditCategory = (updatedCategory) => {
+    setCategories((prevCategories) =>
+      prevCategories.map((category) => 
+        category.id === updatedCategory.id ? updatedCategory : category
+      )
+    );
+  };
+
+  const handleDeleteCategory = async (categoryId) => {
+    try {
+      await axios.delete(`http://localhost:5110/v1/categories/${categoryId}`);
+
+      setCategories(categories.filter(c => c.id !== categoryId));
+    } catch (error) {
+      console.error('Erro ao excluir categoria:', error);
+      alert('Erro ao excluir categoria');
+    }
+  };
+
+  const handleOpenEditModal = (category) => {
+    setEditingCategory(category);
+    setIsCategoryModalOpen(true);
+  }
 
   return (
     <div className="p-4 sm:p-6">
@@ -19,17 +60,19 @@ const Categories = () => {
         Gerenciar Categorias
       </h2>
 
-      <div className="mb-4">
-        <input
-          type="text"
-          value={newCategory}
-          onChange={(e) => setNewCategory(e.target.value)}
-          placeholder="Nova Categoria"
-          className="w-full pl-10 pr-4 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-        />
+      <div className="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        <div className="relative flex-grow">
+          <input
+            type="text"            
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="Buscar categorias..."
+            className="w-full pl-10 pr-4 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+          />
+        </div>
+
         <button
-          onClick={handleAddCategory}
-          className="mt-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+          onClick={() => setIsCategoryModalOpen(true)}
+          className="flex-grow sm:flex-grow-0 bg-green-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
         >
           Adicionar Categoria
         </button>
@@ -37,19 +80,35 @@ const Categories = () => {
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-x-auto">
         <ul>
-          {categories.map((category, index) => (
-            <li key={index} className="flex justify-between items-center py-2 px-4 border-b">
-              <span className="text-gray-800 dark:text-gray-200">{category}</span>
-              <button
-                onClick={() => handleDeleteCategory(category)}
-                className="text-red-500 hover:text-red-700"
-              >
-                Excluir
-              </button>
+          {categories.map((category) => (
+            <li key={category.id} className="flex justify-between items-center py-2 px-4 border-b">
+              <span className="text-gray-800 dark:text-gray-200">{category.title}</span>
+              <div className="flex space-x-3">
+                <button
+                    onClick={() => handleOpenEditModal(category)}
+                    className="p-2 rounded-md bg-green-100 text-green-600 hover:bg-green-200 dark:bg-blue-100 dark:text-blue-600 dark:hover:bg-blue-200 transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />                    
+                </button>
+                <button
+                  onClick={() => handleDeleteCategory(category.id)}
+                  className="p-2 rounded-md bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-100 dark:text-red-600 dark:hover:bg-red-200 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />   
+                </button>
+              </div>
             </li>
           ))}
         </ul>
       </div>
+      
+      <AddCategoryModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        onAddCategory={handleAddCategory}
+        onEditCategory={handleEditCategory}
+        category={editingCategory}
+      />      
     </div>
   );
 };
