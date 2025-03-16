@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import AddCategoryModal from '../components/addCategoryModal';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -88,7 +88,7 @@ const Categories = () => {
                     onClick={() => handleOpenEditModal(category)}
                     className="p-2 rounded-md bg-green-100 text-green-600 hover:bg-green-200 dark:bg-blue-100 dark:text-blue-600 dark:hover:bg-blue-200 transition-colors"
                   >
-                    <Edit2 className="w-4 h-4" />                    
+                    <Edit className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => handleDeleteCategory(category.id)}

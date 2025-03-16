@@ -1,37 +1,105 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, Search, Filter, Edit, Trash2 } from 'lucide-react';
 import AddTransactionModal from '../components/addTransactionModal';
-import AddCategoryModal from '../components/addCategoryModal';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Transactions = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [showMenu, setShowMenu] = useState(false);
-  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [transactions, setTransactions] = useState([
-    { id: 1, description: 'Supermercado', category: 'Alimentação', date: '2023-06-15', amount: -250 },
-    { id: 2, description: 'Salário', category: 'Renda', date: '2023-06-01', amount: 5000 },
-    { id: 3, description: 'Aluguel', category: 'Moradia', date: '2023-06-05', amount: -1200 },
-    { id: 4, description: 'Freelance', category: 'Renda Extra', date: '2023-06-20', amount: 1500 },
-    { id: 5, description: 'Conta de luz', category: 'Contas Fixas', date: '2023-06-10', amount: -150 },
-  ]);
+  const [transactions, setTransactions] = useState([]);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
 
-  const categories = ['Alimentação', 'Renda', 'Moradia', 'Renda Extra', 'Contas Fixas'];
+  const fetchCategory = async (categoryId) => {
+    try {
+      const response = await axios.get(`http://localhost:5110/v1/categories/${categoryId}`);
+      return response.data.data;
+    } catch (error) {
+      console.error('Erro ao buscar categoria:', error);
+      return null;
+    }
+  };
+
+  const fetchTransactions = async () => {
+    try {
+      const response = await axios.get('http://localhost:5110/v1/transactions', {
+        params: {
+          pageNumber: 1,
+          pageSize: 25,
+        }
+      });
+      const fetchedTransactions = response.data.data;
+
+      const transactionsWithCategories = await Promise.all(fetchedTransactions.map(async (transaction) => {
+        if (transaction.categoryId) {
+          const category = await fetchCategory(transaction.categoryId);
+          return { ...transaction, category };
+        }
+        return transaction;
+      }));
+
+      setTransactions(transactionsWithCategories);
+
+      const uniqueCategories = Array.from(
+        new Set(fetchedTransactions.map((t) => t.categoryId).filter(Boolean))
+      ).map((categoryId) => {
+        return categories.find(category => category.id === categoryId);
+      });
+
+      setCategories(uniqueCategories);
+    } catch (error) {
+      console.error('Erro ao buscar transações:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
 
   const filteredTransactions = transactions.filter(transaction =>
-    transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (categoryFilter === 'all' || transaction.category === categoryFilter)
+    transaction.title?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (categoryFilter === 'all' || transaction.category?.title === categoryFilter)
   );
 
-  const handleAddTransaction = (newTransaction) => {
-    setTransactions([
-      ...transactions,
-      { ...newTransaction, id: transactions.length + 1 }
-    ]);
-    setIsModalOpen(false);
+  const handleAddTransaction = async (newTransaction) => {
+    setTransactions([...transactions, newTransaction]);
+    await fetchTransactions();
+  };
+
+  const handleEditTransaction = async (updatedTransaction) => {
+    setTransactions((prevTransactions) =>
+      prevTransactions.map((transaction) => 
+        transaction.id === updatedTransaction.id ? updatedTransaction : transaction
+      )
+    );
+    await fetchTransactions();
+  };
+
+  const handleOpenEditModal = (transaction) => {
+    setEditingTransaction(transaction);
+    setIsTransactionModalOpen(true);
+  };
+
+  const handleDelete = async (transactionId) => {
+    try {
+      // Envia a requisição DELETE para o backend
+      await axios.delete(`http://localhost:5110/v1/transactions/${transactionId}`);
+      
+      // Remove a transação da lista local após excluir no servidor
+      setTransactions((prevTransactions) =>
+        prevTransactions.filter((transaction) => transaction.id !== transactionId)
+      );
+    } catch (error) {
+      console.error('Erro ao excluir transação:', error);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
   };
 
   return (
@@ -52,52 +120,16 @@ const Transactions = () => {
         </div>
 
         <div className="flex gap-4">
-          <div className="relative flex-grow sm:flex-grow-0">
-            <select
-              name="transactionFilter"
-              id="transactionFilter"
-              className="w-full appearance-none pl-3 pr-10 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-            >
-              <option value="all">Todas</option>
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-            <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
-          </div>
-
           <button
             className="flex-grow sm:flex-grow-0 bg-green-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
-            onClick={() => setShowMenu(!showMenu)}
+            onClick={() => {
+              setEditingTransaction(null);
+              setIsTransactionModalOpen(true);
+            }}
           >
             <Plus size={20} className="mr-2" />                                       
             Adicionar
           </button>
-
-          {showMenu && (
-            <div className="absolute bg-white dark:bg-gray-700 shadow-lg rounded-md mt-2 w-48 z-10">
-              <button
-                className="block w-full text-left px-4 py-2 bg-green-600 dark:bg-blue-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
-                onClick={() => {
-                  setIsTransactionModalOpen(true);
-                  setShowMenu(false);
-                }}
-              >
-                Nova Transação
-              </button>
-              <button
-                className="block w-full text-left px-4 py-2 bg-green-600 dark:bg-blue-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
-                onClick={() => {
-                  setIsCategoryModalOpen(true);
-                  setShowMenu(false);
-                }}
-              >
-                Nova Categoria
-              </button>
-            </div>
-          )}
 
           <button
             onClick={() => navigate('/categories')}
@@ -130,13 +162,13 @@ const Transactions = () => {
             {filteredTransactions.map((transaction) => (
               <tr key={transaction.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  {transaction.date}
+                  {formatDate(transaction.paidOrReceivedAt)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
-                  {transaction.description}
+                  {transaction.title}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  {transaction.category}
+                  {transaction.category?.title || "Sem categoria"}
                 </td>
                 <td
                   className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
@@ -149,8 +181,8 @@ const Transactions = () => {
                     <button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8"
-                      onClick={() => handleEdit(transaction.id)}
+                      className="p-2 rounded-md bg-green-100 text-green-600 hover:bg-green-200 dark:bg-blue-100 dark:text-blue-600 dark:hover:bg-blue-200 transition-colors"
+                      onClick={() => handleOpenEditModal(transaction)}
                       aria-label="Editar"
                     >
                       <Edit className="h-4 w-4" />
@@ -159,7 +191,7 @@ const Transactions = () => {
                     <button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+                      className="p-2 rounded-md bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-100 dark:text-red-600 dark:hover:bg-red-200 transition-colors"
                       onClick={() => handleDelete(transaction.id)}
                       aria-label="Excluir"
                     >
@@ -177,11 +209,8 @@ const Transactions = () => {
         isOpen={isTransactionModalOpen}
         onClose={() => setIsTransactionModalOpen(false)}
         onAddTransaction={handleAddTransaction}
-      />
-
-      <AddCategoryModal
-        isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
+        onEditTransaction={handleEditTransaction}
+        transaction={editingTransaction}
       />
     </div>
   );
