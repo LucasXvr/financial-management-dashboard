@@ -7,7 +7,6 @@ import axios from 'axios';
 const Transactions = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [categories, setCategories] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [transactions, setTransactions] = useState([]);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
@@ -42,14 +41,7 @@ const Transactions = () => {
       }));
 
       setTransactions(transactionsWithCategories);
-
-      const uniqueCategories = Array.from(
-        new Set(fetchedTransactions.map((t) => t.categoryId).filter(Boolean))
-      ).map((categoryId) => {
-        return categories.find(category => category.id === categoryId);
-      });
-
-      setCategories(uniqueCategories);
+      
     } catch (error) {
       console.error('Erro ao buscar transações:', error);
     }
@@ -155,6 +147,8 @@ const Transactions = () => {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Valor
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
               </th>
             </tr>
           </thead>
