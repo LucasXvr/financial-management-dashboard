@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { X } from 'lucide-react';
+import { NumericFormat } from "react-number-format";
 
 const AddTransactionModal = ({ isOpen, onClose, onAddTransaction, transaction, onEditTransaction }) => {
   const [description, setDescription] = useState('');
@@ -117,11 +118,16 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction, transaction, o
             <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Valor
             </label>
-            <input
-              type="number"
+            <NumericFormat              
               id="amount"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onValueChange={(values) => setAmount(values.value)}
+              thousandSeparator={"."}
+              decimalSeparator={","}
+              prefix={"R$ "}
+              fixedDecimalScale={true}
+              decimalScale={2}
+              allowNegative={false}
               className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
               required
             />
