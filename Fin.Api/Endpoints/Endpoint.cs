@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Fin.Api.Common.Api;
 using Fin.Api.Endpoints.Categories;
+using Fin.Api.Endpoints.FinancialReports;
+using Fin.Api.Endpoints.FinancialReportsName;
 using Fin.Api.Endpoints.Transactions;
 
 namespace Fin.Api.Endpoints
@@ -36,6 +38,17 @@ namespace Fin.Api.Endpoints
                 .MapEndpoint<DeleteTransactionEndpoint>()
                 .MapEndpoint<GetTransactionByIdEndpoint>()
                 .MapEndpoint<GetTransactionsByPeriodEndpoint>();
+
+            endpoints.MapGroup("v1/financial-reports")
+                .WithTags("Financial Reports")
+                // .RequireAuthorization()
+                .MapEndpoint<GetCurrentBalanceEndpoint>()
+                .MapEndpoint<GetTotalIncomeByPeriodEndpoint>()
+                .MapEndpoint<GetTotalExpensesByPeriodEndpoint>()
+                .MapEndpoint<GetSavingsByPeriodEndpoint>()
+                .MapEndpoint<GetBalanceOverTimeEndpoint>()
+                .MapEndpoint<GetExpensesByCategoryEndpoint>()
+                .MapEndpoint<GetTransactionsByMonthEndpoint>();
         }
 
         private static IEndpointRouteBuilder MapEndpoint<TEndpoint>(this IEndpointRouteBuilder app)

@@ -15,5 +15,12 @@ namespace Fin.Core.Handlers
         Task<Response<Transaction?>> DeleteAsync(DeleteTransactionRequest request);
         Task<Response<Transaction?>> GetByIdAsync(GetTransactionByIdRequest request);
         Task<PagedResponse<List<Transaction>?>> GetByPeriodAsync(GetTransactionsByPeriodRequest request);
+        Task<decimal> GetCurrentBalance();
+        Task<decimal> GetTotalIncomeByPeriod(DateTime start, DateTime end);
+        Task<decimal> GetTotalExpensesByPeriod(DateTime start, DateTime end);
+        Task<decimal> GetSavingsByPeriod(DateTime start, DateTime end);
+        Task<List<BalanceOverTimeDTO>> GetBalanceOverTime(int months);
+        Task<List<ExpensesByCategoryDTO>> GetExpensesByCategory(DateTime start, DateTime end);
+        Task<List<TransactionsByMonthDTO>> GetTransactionsByMonth(int months);
     }
 }

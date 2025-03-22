@@ -43,7 +43,7 @@ namespace Fin.Api.Handlers
                 return new Response<Transaction?>(null, 500, "Não foi possível criar sua transação");
             }
         }
-
+        
         public async Task<Response<Transaction?>> DeleteAsync(DeleteTransactionRequest request)
         {
             try
@@ -156,6 +156,117 @@ namespace Fin.Api.Handlers
             {
                 return new Response<Transaction?>(null, 500, "Não foi possível recuperar sua transação");
             }
+        }
+    
+        public async Task<decimal> GetCurrentBalance()
+        {
+            var deposit = await context.Transactions
+                .Where(t => t.Type == ETransactionType.Deposit)
+                .SumAsync(t => t.Amount);
+
+            var withdraw = await context.Transactions
+                .Where(t => t.Type == ETransactionType.Withdraw)
+                .SumAsync(t => t.Amount);
+
+            return deposit - withdraw;
+        }
+
+        public async Task<decimal> GetTotalIncomeByPeriod(DateTime start, DateTime end)
+        {
+            return await context.Transactions
+                .Where(t => t.Type == ETransactionType.Deposit && t.PaidOrReceivedAt >= start && t.PaidOrReceivedAt <= end)
+                .SumAsync(t => t.Amount);
+        }
+
+        public async Task<decimal> GetTotalExpensesByPeriod(DateTime start, DateTime end)
+        {
+            return await context.Transactions
+                .Where(t => t.Type == ETransactionType.Withdraw && t.PaidOrReceivedAt >= start && t.PaidOrReceivedAt <= end)
+                .SumAsync(t => t.Amount);
+        }
+
+        public async Task<decimal> GetSavingsByPeriod(DateTime start, DateTime end)
+        {
+            var income = await GetTotalIncomeByPeriod(start, end);
+            var expenses = await GetTotalExpensesByPeriod(start, end);
+            return income - expenses;
+        }
+
+        public async Task<List<BalanceOverTimeDTO>> GetBalanceOverTime(int months)
+        {
+            var result = new List<BalanceOverTimeDTO>();
+            var currentDate = DateTime.Now;
+
+            for (int i = months - 1; i >= 0; i--)
+            {
+                var date = currentDate.AddMonths(-i);
+                var startOfMonth = new DateTime(date.Year, date.Month, 1);
+                var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+
+                // Calculamos o saldo acumulado até o final deste mês
+                var totalIncome = await context.Transactions
+                    .Where(t => t.Type == ETransactionType.Deposit && t.PaidOrReceivedAt <= endOfMonth)
+                    .SumAsync(t => t.Amount);
+
+                var totalExpenses = await context.Transactions
+                    .Where(t => t.Type == ETransactionType.Withdraw && t.PaidOrReceivedAt <= endOfMonth)
+                    .SumAsync(t => t.Amount);
+
+                var balance = totalIncome - totalExpenses;
+
+                result.Add(new BalanceOverTimeDTO
+                {
+                    Month = date.ToString("MMM", new System.Globalization.CultureInfo("pt-BR")),
+                    Balance = balance
+                });
+            }
+
+            return result;
+        }
+
+        public async Task<List<ExpensesByCategoryDTO>> GetExpensesByCategory(DateTime start, DateTime end)
+        {
+            return await context.Transactions
+                .Where(t => t.Type == ETransactionType.Withdraw && t.PaidOrReceivedAt >= start && t.PaidOrReceivedAt <= end)
+                .GroupBy(t => t.Category.Title)
+                .Select(g => new ExpensesByCategoryDTO
+                {
+                    Category = g.Key,
+                    Amount = g.Sum(t => t.Amount)
+                })
+                .OrderByDescending(x => x.Amount)
+                .Take(5) // Pegar as 5 maiores categorias
+                .ToListAsync();
+        }
+
+        public async Task<List<TransactionsByMonthDTO>> GetTransactionsByMonth(int months)
+        {
+            var result = new List<TransactionsByMonthDTO>();
+            var currentDate = DateTime.Now;
+
+            for (int i = months - 1; i >= 0; i--)
+            {
+                var date = currentDate.AddMonths(-i);
+                var startOfMonth = new DateTime(date.Year, date.Month, 1);
+                var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+
+                var income = await context.Transactions
+                    .Where(t => t.Type == ETransactionType.Deposit && t.PaidOrReceivedAt >= startOfMonth && t.PaidOrReceivedAt <= endOfMonth)
+                    .SumAsync(t => t.Amount);
+
+                var expenses = await context.Transactions
+                    .Where(t => t.Type == ETransactionType.Withdraw && t.PaidOrReceivedAt >= startOfMonth && t.PaidOrReceivedAt <= endOfMonth)
+                    .SumAsync(t => t.Amount);
+
+                result.Add(new TransactionsByMonthDTO
+                {
+                    Month = date.ToString("MMM", new System.Globalization.CultureInfo("pt-BR")),
+                    Income = income,
+                    Expenses = expenses
+                });
+            }
+
+            return result;
         }
     }
 }
