@@ -2,7 +2,7 @@ namespace Fin.Core.Responses
 {
     public class ExpensesByCategoryDTO
     {
-        public string Category { get; set; }
-        public decimal Amount { get; set; }
+        public required string Category { get; set; }
+        public required decimal Amount { get; set; }
     }
 }

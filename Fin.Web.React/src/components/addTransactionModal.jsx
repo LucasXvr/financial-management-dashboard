@@ -34,20 +34,22 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction, transaction, o
   }, [pageNumber]);
 
   useEffect(() => {
-    if (transaction) {
-      setDescription(transaction.title);
-      setAmount(transaction.amount);
-      setDate(transaction.paidOrReceivedAt?.split('T')[0] || '');
-      setType(transaction.type?.toString() || '1');
-      setCategoryId(transaction.categoryId?.toString() || '');
-    } else {
-      setDescription('');
-      setAmount('');
-      setDate('');
-      setType('1');
-      setCategoryId('');
+    if (isOpen) {
+      if (transaction) {
+        setDescription(transaction.title);
+        setAmount(transaction.amount);
+        setDate(transaction.paidOrReceivedAt?.split('T')[0] || '');
+        setType(transaction.type?.toString() || '1');
+        setCategoryId(transaction.categoryId?.toString() || '');
+      } else {
+        setDescription('');
+        setAmount('');
+        setDate('');
+        setType('1');
+        setCategoryId('');
+      }
     }
-  }, [transaction]);
+  }, [isOpen, transaction]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

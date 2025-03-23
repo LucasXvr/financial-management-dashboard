@@ -2,7 +2,7 @@ namespace Fin.Core.Responses
 {
     public class BalanceOverTimeDTO
     {
-        public string Month { get; set; }
-        public decimal Balance { get; set; }
+        public required string Month { get; set; }
+        public required decimal Balance { get; set; }
     }
 }

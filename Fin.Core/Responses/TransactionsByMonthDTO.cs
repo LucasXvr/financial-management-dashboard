@@ -2,8 +2,8 @@ namespace Fin.Core.Responses
 {
     public class TransactionsByMonthDTO
     {
-        public string Month { get; set; }
-        public decimal Income { get; set; }
-        public decimal Expenses { get; set; }
+        public required string Month { get; set; }
+        public required decimal Income { get; set; }
+        public required decimal Expenses { get; set; }
     }
 }
