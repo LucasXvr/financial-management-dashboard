@@ -56,7 +56,7 @@ export default function Header() {
           } w-full lg:flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6 mt-4 lg:mt-0 lg:w-auto`}
         >
           <Link
-            to="/"
+            to="/dashboard"
             className={`flex items-center hover:text-green-300 transition-colors ${
               location.pathname === '/dashboard' ? 'text-green-300' : ''
             }`}

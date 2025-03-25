@@ -5,6 +5,7 @@ import Header from "./components/header.jsx";
 import Transactions from './pages/transactions.jsx';
 import Categories from './pages/categories.jsx';
 import Budget from './pages/budget.jsx';
+import LandingPage from './pages/landing-page.jsx';
 
 function App() {
   return (
@@ -12,7 +13,8 @@ function App() {
        <div className="App bg-gray-100 dark:bg-gray-900 min-h-screen">
         <Header/>
         <Routes>
-          <Route path="/" element={<Dashboard to="/" replace/>}></Route>
+          <Route path="/" element={<LandingPage to="/" replace/>}></Route>
+          <Route path="/dashboard" element={<Dashboard to="/dashboard"/>}></Route>
           <Route path="/transactions" element={<Transactions to="/transactions"/>}></Route>
           <Route path="/categories" element={<Categories to="/categories"/>}></Route>
           <Route path="/budget" element={<Budget to="/budget"/>}></Route>
