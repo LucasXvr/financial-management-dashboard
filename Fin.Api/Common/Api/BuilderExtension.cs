@@ -49,7 +49,16 @@ namespace Fin.Api.Common.Api
             builder
                 .Services
                 .AddDbContext<AppDbContext>(
-                    x => { x.UseSqlServer(Configuration.ConnectionString); });
+                    x => x.UseSqlServer(
+                        Configuration.ConnectionString,
+                        options => options.EnableRetryOnFailure(
+                            maxRetryCount: 5,
+                            maxRetryDelay: TimeSpan.FromSeconds(30),
+                            errorNumbersToAdd: null
+                        )
+                    )
+                );
+
             builder.Services
                 .AddIdentityCore<User>()
                 .AddRoles<IdentityRole<long>>()
@@ -82,18 +91,6 @@ namespace Fin.Api.Common.Api
             builder
                 .Services
                 .AddTransient<ITransactionHandler, TransactionHandler>();
-
-            // builder
-            //     .Services
-            //     .AddTransient<IReportHandler, ReportHandler>();
-
-            // builder
-            //     .Services
-            //     .AddTransient<IOrderHandler, OrderHandler>();
-
-            // builder
-            //     .Services
-            //     .AddTransient<IStripeHandler, StripeHandler>();
         }
     }
 }
