@@ -22,7 +22,7 @@ const LandingPage = () => {
                   className="px-6 py-3 sm:flex-grow-0 bg-green-600 dark:bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
                 >
                   Acessar Demonstração
-                </button>          
+                </button>
               </div>
             </div>
             <div className="md:w-1/2">

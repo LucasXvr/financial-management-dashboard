@@ -154,12 +154,29 @@ function Dashboard() {
 
   // Exibir mensagem de carregamento
   if (isLoading) {
-    return <div className="p-6 text-center">Carregando dados do dashboard...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Carregando dados do dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   // Exibir mensagem de erro
   if (error) {
-    return <div className="p-6 text-center text-red-500">{error}</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg shadow-md max-w-md text-center">
+          <svg className="w-8 h-8 mx-auto mb-2 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path>
+          </svg>
+          <p className="font-semibold">Ocorreu um erro</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   return <div className="p-6">
