@@ -160,18 +160,6 @@ namespace Fin.Api.Handlers
     
         public async Task<decimal> GetCurrentBalance()
         {
-            // var deposit = await context.Transactions
-            //     .Where(t => t.Type == ETransactionType.Deposit)
-            //     .SumAsync(t => t.Amount);
-
-            // var withdraw = await context.Transactions
-            //     .Where(t => t.Type == ETransactionType.Withdraw)
-            //     .SumAsync(t => t.Amount);               
-
-            // return deposit + Math.Abs(withdraw);
-            // return await context.Transactions
-            //         .SumAsync(t => t.Amount);
-
             var transactions = await context.Transactions.ToListAsync();
             
             var deposits = transactions

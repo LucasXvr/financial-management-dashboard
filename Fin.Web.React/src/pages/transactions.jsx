@@ -11,6 +11,8 @@ const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
+  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [endDate, setEndDate] = useState(new Date().toISOString().slice(0, 10));
 
   const fetchCategory = async (categoryId) => {
     try {
@@ -28,6 +30,8 @@ const Transactions = () => {
         params: {
           pageNumber: 1,
           pageSize: 25,
+          startDate,
+          endDate,          
         }
       });
       const fetchedTransactions = response.data.data;
@@ -40,8 +44,7 @@ const Transactions = () => {
         return transaction;
       }));
 
-      setTransactions(transactionsWithCategories);
-      
+      setTransactions(transactionsWithCategories);      
     } catch (error) {
       console.error('Erro ao buscar transações:', error);
     }
@@ -111,7 +114,26 @@ const Transactions = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
         </div>
 
-        <div className="flex gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+          <input 
+            type="date" 
+            value={startDate} 
+            onChange={(e) => setStartDate(e.target.value)} 
+            className="border p-2 rounded"
+          />
+          <input 
+            type="date" 
+            value={endDate} 
+            onChange={(e) => setEndDate(e.target.value)} 
+            className="border p-2 rounded"
+          />
+
+          <button 
+            onClick={fetchTransactions} 
+            className="flex-grow sm:flex-grow-0 bg-green-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-green-700 dark:hover:bg-blue-600 transition-colors">
+            Filtrar
+          </button>
+
           <button
             className="flex-grow sm:flex-grow-0 bg-green-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md flex items-center justify-center hover:bg-green-700 dark:hover:bg-blue-600 transition-colors"
             onClick={() => {
