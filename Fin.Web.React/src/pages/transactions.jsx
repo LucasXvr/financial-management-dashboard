@@ -122,7 +122,7 @@ const Transactions = () => {
             className="border p-2 rounded"
           />
           <input 
-            type="date" 
+            type="date"
             value={endDate} 
             onChange={(e) => setEndDate(e.target.value)} 
             className="border p-2 rounded"
