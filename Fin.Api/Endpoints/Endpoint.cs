@@ -6,7 +6,9 @@ using Fin.Api.Common.Api;
 using Fin.Api.Endpoints.Categories;
 using Fin.Api.Endpoints.FinancialReports;
 using Fin.Api.Endpoints.FinancialReportsName;
+using Fin.Api.Endpoints.Identity;
 using Fin.Api.Endpoints.Transactions;
+using Fin.Api.Models;
 
 namespace Fin.Api.Endpoints
 {
@@ -38,6 +40,15 @@ namespace Fin.Api.Endpoints
                 .MapEndpoint<DeleteTransactionEndpoint>()
                 .MapEndpoint<GetTransactionByIdEndpoint>()
                 .MapEndpoint<GetTransactionsByPeriodEndpoint>();
+
+            endpoints.MapGroup("v1/identity")
+                .WithTags("Identity")
+                .MapIdentityApi<User>();
+
+            endpoints.MapGroup("v1/identity")
+                .WithTags("Identity")
+                .MapEndpoint<LogoutEndpoint>()
+                .MapEndpoint<GetRolesEndpoint>();
 
             endpoints.MapGroup("v1/financial-reports")
                 .WithTags("Financial Reports")
