@@ -9,6 +9,7 @@ import Budget from './pages/budget.jsx';
 import LandingPage from './pages/landing-page.jsx';
 import Login from './pages/login.jsx';
 import PrivateRoute from './components/privateRoute.jsx';
+import Register from './pages/register.jsx';
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage to="/" replace/>}></Route>
           <Route path="/login" element={<Login/>}></Route>
+          <Route path="/register" element={<Register />} />
+
           <Route path="/dashboard" element={<Dashboard to="/dashboard"/>}></Route>
           <Route path="/transactions" element={<Transactions to="/transactions"/>}></Route>
           <Route path="/categories" element={<Categories to="/categories"/>}></Route>

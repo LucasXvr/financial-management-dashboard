@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5110/v1';
@@ -17,6 +18,8 @@ function Login({ onLoginSuccess }) {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -30,7 +33,12 @@ function Login({ onLoginSuccess }) {
 
       const { token } = response.data;
       localStorage.setItem('token', token);
-      onLoginSuccess(); // Redireciona para o Dashboard
+
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       console.error('Erro ao fazer login:', error);
       setErrorMsg('Credenciais inválidas. Verifique e tente novamente.');
@@ -79,6 +87,19 @@ function Login({ onLoginSuccess }) {
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
+
+        <div className="mt-4 text-sm text-center text-gray-600 dark:text-gray-300">
+          <Link to="/forgot-password" className="text-blue-600 hover:underline dark:text-blue-400">
+            Esqueceu a senha?
+          </Link>
+        </div>
+
+        <div className="mt-2 text-sm text-center text-gray-600 dark:text-gray-300">
+          Não tem uma conta?{' '}
+          <Link to="/register" className="text-blue-600 hover:underline dark:text-blue-400">
+            Criar conta
+          </Link>
+        </div>
       </div>
     </div>
   );
