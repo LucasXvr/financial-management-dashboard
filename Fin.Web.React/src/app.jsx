@@ -10,6 +10,7 @@ import LandingPage from './pages/landing-page.jsx';
 import Login from './pages/login.jsx';
 import PrivateRoute from './components/privateRoute.jsx';
 import Register from './pages/register.jsx';
+import ForgotPassword from './pages/forgot-password.jsx';
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
           <Route path="/" element={<LandingPage to="/" replace/>}></Route>
           <Route path="/login" element={<Login/>}></Route>
           <Route path="/register" element={<Register />} />
-
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/dashboard" element={<Dashboard to="/dashboard"/>}></Route>
           <Route path="/transactions" element={<Transactions to="/transactions"/>}></Route>
           <Route path="/categories" element={<Categories to="/categories"/>}></Route>
