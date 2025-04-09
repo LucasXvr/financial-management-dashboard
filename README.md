@@ -22,12 +22,12 @@ Sistema de gerenciamento financeiro pessoal, focado em controle de receitas e de
 ### Frontend
 - **React**
 - **Axios** para requisições HTTP
-- **React Router Dom** para rotas (se estiver usando)
-- **TailwindCSS** (caso esteja estilizando com ele)
+- **React Router Dom** para rotas
+- **TailwindCSS**
 
 ### Outros
-- **Swagger** (se configurado)
-- **Postman** (para testes dos endpoints)
+- **Swagger** 
+- **Postman**
 
 ## 🎯 Próximos Passos
 
@@ -71,5 +71,5 @@ npm start
 
 ## 👤 Autor
 
-Desenvolvido por **Lucas Xavier**  
-[LinkedIn](https://www.linkedin.com/in/seu-perfil) | [GitHub](https://github.com/seu-usuario)
+Desenvolvido por **Lucas Xavier**
+[LinkedIn](https://www.linkedin.com/in/lucas-xavier-89a44120b/) | [GitHub](https://github.com/LucasXvr)
