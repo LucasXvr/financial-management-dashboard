@@ -104,7 +104,7 @@ const LandingPage = () => {
               { title: "Segurança Garantida", desc: "Seus dados são protegidos com criptografia de ponta." }
             ].map((feature, index) => (
               <div key={index} className="p-6 bg-gray-100 dark:bg-gray-700 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-green-800 dark:text-green-300">{feature.title}</h3>
+                <h3 className="text-xl font-semibold text-green-950 dark:text-white">{feature.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300 mt-2">{feature.desc}</p>
               </div>
             ))}
@@ -123,7 +123,7 @@ const LandingPage = () => {
             ].map((testimonial, index) => (
               <div key={index} className="p-6 bg-gray-100 dark:bg-gray-700 rounded-lg shadow-md">
                 <p className="italic text-gray-600 dark:text-gray-300">"{testimonial.feedback}"</p>
-                <h4 className="mt-4 font-semibold text-green-800 dark:text-green-300">- {testimonial.name}</h4>
+                <h4 className="mt-4 font-semibold text-green-950 dark:text-white">- {testimonial.name}</h4>
               </div>
             ))}
           </div>
