@@ -1,53 +1,75 @@
+using System.Collections;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Fin.Api.Models;
-using Fin.Core.Responses;
-using Microsoft.Extensions.Configuration;
+using Fin.Core.Models.Account;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Fin.Api.Services
 {
+    public interface ITokenService
+    {
+        string GenerateJwtToken(User user, IList<string> roles);
+        ClaimsPrincipal ValidateToken(string token);
+    }
+
     public class TokenService : ITokenService
     {
-        private readonly IConfiguration _configuration;
+        private readonly JwtSettings _jwtSettings;
 
-        public TokenService(IConfiguration configuration)
+        public TokenService(JwtSettings jwtSettings)
         {
-            _configuration = configuration;
+            _jwtSettings = jwtSettings;
         }
 
-        public async Task<AuthResponseDTO> GenerateTokenAsync(User user)
+        public string GenerateJwtToken(User user, IList<string> roles)
         {
-            // Aqui futuramente você pode usar await com UserManager
-            await Task.CompletedTask;
-
+            var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
             var claims = new List<Claim>
             {
-                new(ClaimTypes.Name, user.UserName ?? ""),
-                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Email, user.Email ?? "")
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email)
             };
 
-            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new Exception("JWT Key not configured."));
-            var cred = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
-            var expiration = DateTime.UtcNow.AddHours(2);
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: expiration,
-                signingCredentials: cred
-            );
-
-            return new AuthResponseDTO
+            foreach (var role in roles)
             {
-                Token = new JwtSecurityTokenHandler().WriteToken(token),
-                Expiration = expiration,
-                Email = user.Email ?? "",
-                Claims = claims.ToDictionary(c => c.Type, c => c.Value)
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryInMinutes),
+                Issuer = _jwtSettings.Issuer,
+                Audience = _jwtSettings.Audience,
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256Signature)
             };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
+        public ClaimsPrincipal ValidateToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidIssuer = _jwtSettings.Issuer,
+                ValidateAudience = true,
+                ValidAudience = _jwtSettings.Audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+            
+            return tokenHandler.ValidateToken(token, validationParameters, out _);           
         }
     }
 }

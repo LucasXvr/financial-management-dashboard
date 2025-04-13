@@ -41,15 +41,6 @@ namespace Fin.Api.Endpoints
                 .MapEndpoint<GetTransactionByIdEndpoint>()
                 .MapEndpoint<GetTransactionsByPeriodEndpoint>();
 
-            endpoints.MapGroup("v1/identity")
-                .WithTags("Identity")
-                .MapIdentityApi<User>();
-
-            endpoints.MapGroup("v1/identity")
-                .WithTags("Identity")
-                .MapEndpoint<LogoutEndpoint>()
-                .MapEndpoint<GetRolesEndpoint>();
-
             endpoints.MapGroup("v1/financial-reports")
                 .WithTags("Financial Reports")
                 // .RequireAuthorization()
