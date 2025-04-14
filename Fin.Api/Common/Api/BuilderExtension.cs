@@ -1,14 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Fin.Api.Data;
 using Fin.Api.Handlers;
 using Fin.Api.Models;
+using Fin.Api.Services;
 using Fin.Core;
+using Fin.Core.Common.Extensions;
 using Fin.Core.Handlers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Fin.Api.Common.Api
 {
@@ -38,7 +44,12 @@ namespace Fin.Api.Common.Api
         public static void AddSecurity(this WebApplicationBuilder builder)
         {
             builder.Services
-                .AddAuthentication(IdentityConstants.ApplicationScheme)
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+                    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+                    options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+                })
                 .AddIdentityCookies();
 
             builder.Services.AddAuthorization();
@@ -58,12 +69,6 @@ namespace Fin.Api.Common.Api
                         )
                     )
                 );
-
-            builder.Services
-                .AddIdentityCore<User>()
-                .AddRoles<IdentityRole<long>>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddApiEndpoints();
         }
 
         public static void AddCrossOrigin(this WebApplicationBuilder builder)
@@ -91,6 +96,34 @@ namespace Fin.Api.Common.Api
             builder
                 .Services
                 .AddTransient<ITransactionHandler, TransactionHandler>();
+
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();                
+
+            builder
+                .Services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidAudience = jwtSettings.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+                    };
+                });     
+
+            builder.Services.AddScoped(provider => 
+                provider.GetRequiredService<IOptions<JwtSettings>>().Value);
+
+            builder.Services.AddSingleton<ITokenService, TokenService>();
+
+            builder.Services.AddIdentity<User, IdentityRole<long>>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
         }
     }
 }

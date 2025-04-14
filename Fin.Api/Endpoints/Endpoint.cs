@@ -23,6 +23,12 @@ namespace Fin.Api.Endpoints
                 .WithTags("Health Check")
                 .MapGet("/", () => new { message = "OK" });
 
+            endpoints.MapGroup("v1/identity")
+                .WithTags("Identity")
+                .AllowAnonymous() // já está definido nos próprios endpoints, mas você pode reforçar aqui
+                .MapEndpoint<LoginEndpoint>()
+                .MapEndpoint<RegisterEndpoint>();
+
             endpoints.MapGroup("v1/categories")
                 .WithTags("Categories")
                 // .RequireAuthorization()
