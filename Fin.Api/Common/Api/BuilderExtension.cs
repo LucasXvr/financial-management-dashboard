@@ -43,14 +43,39 @@ namespace Fin.Api.Common.Api
 
         public static void AddSecurity(this WebApplicationBuilder builder)
         {
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+            
+            if (jwtSettings == null)
+                throw new InvalidOperationException("JwtSettings não encontrado na configuração");
+                
+            if (string.IsNullOrEmpty(jwtSettings.SecretKey))
+                throw new InvalidOperationException("JwtSettings.SecretKey não pode ser nulo ou vazio");
+                
+            if (string.IsNullOrEmpty(jwtSettings.Issuer))
+                throw new InvalidOperationException("JwtSettings.Issuer não pode ser nulo ou vazio");
+                
+            if (string.IsNullOrEmpty(jwtSettings.Audience))
+                throw new InvalidOperationException("JwtSettings.Audience não pode ser nulo ou vazio");
+
             builder.Services
                 .AddAuthentication(options =>
                 {
-                    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
-                    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
-                    options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
-                .AddIdentityCookies();
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidAudience = jwtSettings.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+                    };
+                });
 
             builder.Services.AddAuthorization();
         }
@@ -97,33 +122,23 @@ namespace Fin.Api.Common.Api
                 .Services
                 .AddTransient<ITransactionHandler, TransactionHandler>();
 
-            var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();                
-
-            builder
-                .Services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtSettings.Issuer,
-                        ValidAudience = jwtSettings.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
-                    };
-                });     
-
             builder.Services.AddScoped(provider => 
                 provider.GetRequiredService<IOptions<JwtSettings>>().Value);
 
             builder.Services.AddSingleton<ITokenService, TokenService>();
 
-            builder.Services.AddIdentity<User, IdentityRole<long>>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
+            builder.Services.AddIdentity<User, IdentityRole<long>>(options => 
+            {
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequiredLength = 8;
+                
+                options.User.RequireUniqueEmail = true;
+            })
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
         }
     }
 }

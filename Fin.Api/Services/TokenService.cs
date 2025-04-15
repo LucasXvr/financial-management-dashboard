@@ -3,7 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Fin.Core.Common.Extensions;
-using Fin.Core.Models.Account;
+using Fin.Api.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -26,6 +26,12 @@ namespace Fin.Api.Services
 
         public string GenerateJwtToken(User user, IList<string> roles)
         {
+            if (user == null)
+                throw new ArgumentNullException(nameof(user));
+                
+            if (user.Email == null)
+                throw new ArgumentNullException(nameof(user.Email));
+                
             var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
             var claims = new List<Claim>
             {

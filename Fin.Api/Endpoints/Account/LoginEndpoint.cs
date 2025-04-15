@@ -1,7 +1,7 @@
 using Fin.Api.Common.Api;
 using Fin.Api.Services;
 using Fin.Core.Common.Extensions;
-using Fin.Core.Models.Account;
+using Fin.Api.Models;
 using Fin.Core.Requests.Account;
 using Fin.Core.Responses;
 using Fin.Core.Responses.Account;
@@ -42,6 +42,14 @@ public class LoginEndpoint : IEndpoint
 
         var roles = await userManager.GetRolesAsync(user);
         var token = tokenService.GenerateJwtToken(user, roles);
+
+        if (user == null)
+            return TypedResults.BadRequest(
+                new Response<LoginResponse>(null, 500, "Erro ao processar login: usuário não encontrado"));
+
+        if (user.Email == null)
+            return TypedResults.BadRequest(
+                new Response<LoginResponse>(null, 500, "Erro ao processar login: email do usuário não encontrado"));
 
         var loginResponse = new LoginResponse
         {
