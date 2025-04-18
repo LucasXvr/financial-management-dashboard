@@ -22,6 +22,9 @@ namespace Fin.Api.Services
         public TokenService(IOptions<JwtSettings> jwtSettings)
         {
             _jwtSettings = jwtSettings.Value;
+            
+            if (string.IsNullOrEmpty(_jwtSettings.SecretKey))
+                throw new InvalidOperationException("JwtSettings.SecretKey não pode ser nulo ou vazio");
         }
 
         public string GenerateJwtToken(User user, IList<string> roles)
@@ -32,6 +35,9 @@ namespace Fin.Api.Services
             if (user.Email == null)
                 throw new ArgumentNullException(nameof(user.Email));
                 
+            if (string.IsNullOrEmpty(_jwtSettings.SecretKey))
+                throw new InvalidOperationException("JwtSettings.SecretKey não pode ser nulo ou vazio");
+
             var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
             var claims = new List<Claim>
             {
