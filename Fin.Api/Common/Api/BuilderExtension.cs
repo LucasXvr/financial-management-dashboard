@@ -122,7 +122,10 @@ namespace Fin.Api.Common.Api
                 .Services
                 .AddTransient<ITransactionHandler, TransactionHandler>();
 
-            builder.Services.AddScoped(provider => 
+            builder.Services.Configure<JwtSettings>(
+                builder.Configuration.GetSection("JwtSettings"));
+
+            builder.Services.AddSingleton<JwtSettings>(provider => 
                 provider.GetRequiredService<IOptions<JwtSettings>>().Value);
 
             builder.Services.AddSingleton<ITokenService, TokenService>();

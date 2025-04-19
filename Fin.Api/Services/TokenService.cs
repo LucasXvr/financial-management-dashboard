@@ -19,9 +19,9 @@ namespace Fin.Api.Services
     {
         private readonly JwtSettings _jwtSettings;
 
-        public TokenService(IOptions<JwtSettings> jwtSettings)
+        public TokenService(JwtSettings jwtSettings)
         {
-            _jwtSettings = jwtSettings.Value;
+            _jwtSettings = jwtSettings;
             
             if (string.IsNullOrEmpty(_jwtSettings.SecretKey))
                 throw new InvalidOperationException("JwtSettings.SecretKey não pode ser nulo ou vazio");

@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddConfiguration();
+builder.AddServices();
 builder.AddSecurity();
 builder.AddDataContexts();
 builder.AddCrossOrigin();
 builder.AddDocumentation();
-builder.AddServices();
 
 var app = builder.Build();
 
