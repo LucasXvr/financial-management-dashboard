@@ -29,9 +29,13 @@ namespace Fin.Api.Endpoints.Categories
             [FromQuery] int pageNumber = Configuration.DefaultPageNumber,
             [FromQuery] int pageSize = Configuration.DefaultPageSize)
         {
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return TypedResults.BadRequest(new PagedResponse<List<Category>?>(null, 400, "Usuário não encontrado"));
+
             var request = new GetAllCategoriesRequest
             {
-                UserId = user.Identity?.Name ?? string.Empty,
+                UserId = userId,
                 PageNumber = pageNumber,
                 PageSize = pageSize,
             };

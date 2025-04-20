@@ -26,11 +26,15 @@ namespace Fin.Api.Endpoints.Categories
             ICategoryHandler handler,
             CreateCategoryRequest request)
         {
-            request.UserId = user.Identity?.Name ?? string.Empty;
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return TypedResults.BadRequest(new Response<Category?>(null, 400, "Usuário não encontrado"));
+
+            request.UserId = userId;
             var result = await handler.CreateAsync(request);
             return result.IsSuccess
                 ? TypedResults.Created($"/{result.Data?.Id}", result)
-                : TypedResults.BadRequest(result.Data);
+                : TypedResults.BadRequest(result);
         }
     }
 }

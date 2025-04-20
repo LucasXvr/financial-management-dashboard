@@ -27,7 +27,11 @@ namespace Fin.Api.Endpoints.Categories
             UpdateCategoryRequest request,
             long id)
         {
-            request.UserId = user.Identity?.Name ?? string.Empty;
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return TypedResults.BadRequest(new Response<Category?>(null, 400, "Usuário não encontrado"));
+
+            request.UserId = userId;
             request.Id = id;
 
             var result = await handler.UpdateAsync(request);

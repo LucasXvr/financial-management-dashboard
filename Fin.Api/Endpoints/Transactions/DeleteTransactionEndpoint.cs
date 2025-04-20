@@ -26,9 +26,13 @@ namespace Fin.Api.Endpoints.Transactions
             ITransactionHandler handler,
             long id)
         {
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return TypedResults.BadRequest(new Response<Transaction?>(null, 400, "Usuário não encontrado"));
+
             var request = new DeleteTransactionRequest
             {
-                UserId = user.Identity?.Name ?? string.Empty,
+                UserId = userId,
                 Id = id
             };
 
