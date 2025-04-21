@@ -9,9 +9,9 @@ namespace Fin.Api.Endpoints.FinancialReports
     {
         public static void Map(IEndpointRouteBuilder app)
         => app.MapGet("/savings", HandleAsync)
-            .WithName("FinancialReports: GetSavings")
-            .WithSummary("Obtém o total de economia em um período")
-            .WithDescription("Retorna a diferença entre receitas e despesas em um período específico")
+            .WithName("FinancialReports: GetSavingsByPeriod")
+            .WithSummary("Obtém a economia em um período")
+            .WithDescription("Retorna a economia do usuário (receitas - despesas) em um período específico")
             .WithOrder(4)
             .Produces<decimal>();
 
@@ -21,7 +21,11 @@ namespace Fin.Api.Endpoints.FinancialReports
             [FromQuery] DateTime startDate,
             [FromQuery] DateTime endDate)
         {
-            var savings = await handler.GetSavingsByPeriod(startDate, endDate);
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return TypedResults.BadRequest(0m);
+
+            var savings = await handler.GetSavingsByPeriod(userId, startDate, endDate);
             return TypedResults.Ok(savings);
         }                    
     }

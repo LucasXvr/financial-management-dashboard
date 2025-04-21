@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Fin.Api.Common.Api;
 using Fin.Api.Endpoints.Categories;
 using Fin.Api.Endpoints.FinancialReports;
-using Fin.Api.Endpoints.FinancialReportsName;
 using Fin.Api.Endpoints.Identity;
 using Fin.Api.Endpoints.Transactions;
 using Fin.Api.Models;

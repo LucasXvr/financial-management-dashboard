@@ -15,7 +15,7 @@ namespace Fin.Api.Endpoints.FinancialReports
         => app.MapGet("/balance-over-time", HandleAsync)
         .WithName("FinancialReports: GetBalanceOverTime")
         .WithSummary("Obtém o saldo ao longo do tempo")
-        .WithDescription("Retorna o saldo para cada mês em um período específico")
+        .WithDescription("Retorna o saldo do usuário ao longo de um número específico de meses")
         .WithOrder(5)
         .Produces<List<BalanceOverTimeDTO>>();
 
@@ -24,7 +24,11 @@ namespace Fin.Api.Endpoints.FinancialReports
             ITransactionHandler handler,
             [FromQuery] int months = 6)
         {
-            var balanceOverTime = await handler.GetBalanceOverTime(months);
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return TypedResults.BadRequest(new List<BalanceOverTimeDTO>());
+
+            var balanceOverTime = await handler.GetBalanceOverTime(userId, months);
             return TypedResults.Ok(balanceOverTime);
         }
     }

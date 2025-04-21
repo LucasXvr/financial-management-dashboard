@@ -22,7 +22,11 @@ namespace Fin.Api.Endpoints.FinancialReports
             [FromQuery] DateTime startDate,
             [FromQuery] DateTime endDate)
         {
-            var expensesByCategory = await handler.GetExpensesByCategory(startDate, endDate);
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return TypedResults.BadRequest(new List<ExpensesByCategoryDTO>());
+
+            var expensesByCategory = await handler.GetExpensesByCategory(userId, startDate, endDate);
             return TypedResults.Ok(expensesByCategory);
         }
     }

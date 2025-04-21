@@ -21,7 +21,11 @@ namespace Fin.Api.Endpoints.FinancialReports
             ITransactionHandler handler,
             [FromQuery] int months = 6)
         {
-            var transactionsByMonth = await handler.GetTransactionsByMonth(months);
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return TypedResults.BadRequest(new List<TransactionsByMonthDTO>());
+
+            var transactionsByMonth = await handler.GetTransactionsByMonth(userId, months);
             return TypedResults.Ok(transactionsByMonth);
         }
     }
