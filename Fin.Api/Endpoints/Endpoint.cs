@@ -24,7 +24,7 @@ namespace Fin.Api.Endpoints
 
             endpoints.MapGroup("v1/identity")
                 .WithTags("Identity")
-                .AllowAnonymous() // já está definido nos próprios endpoints, mas você pode reforçar aqui
+                .AllowAnonymous() // já está definido nos próprios endpoints
                 .MapEndpoint<LoginEndpoint>()
                 .MapEndpoint<RegisterEndpoint>();
 
@@ -48,7 +48,7 @@ namespace Fin.Api.Endpoints
 
             endpoints.MapGroup("v1/financial-reports")
                 .WithTags("Financial Reports")
-                // .RequireAuthorization()
+                .RequireAuthorization()
                 .MapEndpoint<GetCurrentBalanceEndpoint>()
                 .MapEndpoint<GetTotalIncomeByPeriodEndpoint>()
                 .MapEndpoint<GetTotalExpensesByPeriodEndpoint>()
