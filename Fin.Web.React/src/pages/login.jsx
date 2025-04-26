@@ -1,23 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
+import { Eye, EyeOff } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:5110/v1';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-function Login({ onLoginSuccess }) {
+function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -26,25 +18,18 @@ function Login({ onLoginSuccess }) {
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/login', {
-        email,
-        password,
-      });
-
-      const { token } = response.data;
-      localStorage.setItem('token', token);
-
-      if (onLoginSuccess) {
-        onLoginSuccess();
-      } else {
-        navigate('/dashboard');
-      }
+      await login(email, password);
+      navigate('/dashboard');
     } catch (error) {
       console.error('Erro ao fazer login:', error);
-      setErrorMsg('Credenciais inválidas. Verifique e tente novamente.');
+      setErrorMsg(error.message || 'Credenciais inválidas. Verifique e tente novamente.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -62,15 +47,28 @@ function Login({ onLoginSuccess }) {
               required
             />
           </div>
-          <div>
+          <div className="relative">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
-            <input
-              type="password"
-              className="w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white pr-10"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                {showPassword ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
+              </button>
+            </div>
           </div>
 
           {errorMsg && (

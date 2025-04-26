@@ -1,19 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { DollarSign, TrendingUp, CreditCard, PieChart } from 'lucide-react';
-import axios from 'axios';
-
-const API_BASE_URL = 'http://localhost:5110/v1';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  }
-});
+import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
+  const navigate = useNavigate();
 
   // Estados para armazenar os dados da API
   const [currentBalance, setCurrentBalance] = useState(0);
@@ -29,6 +21,15 @@ function Dashboard() {
   const [incomePercentage, setIncomePercentage] = useState("+0.0%");
   const [expensesPercentage, setExpensesPercentage] = useState("+0.0%");
   const [savingsPercentage, setSavingsPercentage] = useState("+0.0%");
+
+  // Verificar autenticação ao carregar o componente
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+  }, [navigate]);
 
   // Função para formatar valores monetários
   const formatCurrency = (value) => {
@@ -78,17 +79,17 @@ function Dashboard() {
           prevIncomeResponse,
           prevExpensesResponse
         ] = await Promise.all([
-          api.get('/financial-reports/balance'),
-          api.get(`/financial-reports/income?startDate=${startDateStr}&endDate=${endDateStr}`),
-          api.get(`/financial-reports/expenses?startDate=${startDateStr}&endDate=${endDateStr}`),
-          api.get(`/financial-reports/savings?startDate=${startDateStr}&endDate=${endDateStr}`),
-          api.get('/financial-reports/balance-over-time?months=6'),
-          api.get(`/financial-reports/expenses-by-category?startDate=${startDateStr}&endDate=${endDateStr}`),
-          api.get(`/financial-reports/income?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`),
-          api.get(`/financial-reports/expenses?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`)
+          api.get('/current-balance'),
+          api.get(`/total-income?startDate=${startDateStr}&endDate=${endDateStr}`),
+          api.get(`/total-expenses?startDate=${startDateStr}&endDate=${endDateStr}`),
+          api.get(`/savings?startDate=${startDateStr}&endDate=${endDateStr}`),
+          api.get('/balance-over-time?months=6'),
+          api.get(`/expenses-by-category?startDate=${startDateStr}&endDate=${endDateStr}`),
+          api.get(`/total-income?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`),
+          api.get(`/total-expenses?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`)
         ]);
 
-        // Processar as respostas (com axios, os dados já estão na propriedade data)
+        // Processar as respostas
         const balance = balanceResponse.data;
         const income = incomeResponse.data;
         const expenses = expensesResponse.data;
@@ -104,7 +105,7 @@ function Dashboard() {
         // Atualizar os estados com os dados da API
         setCurrentBalance(balance);
         setTotalIncome(income);
-        setTotalExpenses(Math.abs(expenses)); // Convertendo para valor positivo para exibição
+        setTotalExpenses(Math.abs(expenses));
         setTotalSavings(savings);
 
         // Formatar dados para os gráficos
@@ -115,28 +116,27 @@ function Dashboard() {
 
         setExpensesByCategory(expensesData.map(item => ({
           category: item.category,
-          amount: Math.abs(item.amount) // Convertendo para valor positivo para exibição
+          amount: Math.abs(item.amount)
         })));
 
-        // Variáveis para armazenar as percentagens de variação
-        const incomePercentage = calculatePercentage(income, prevIncome);
-        const expensesPercentage = calculatePercentage(Math.abs(expenses), Math.abs(prevExpenses));
-        const savingsPercentage = calculatePercentage(savings, prevSavings);
-
-        // Atualizar variáveis locais para usar nos cards
-        setIncomePercentage(incomePercentage);
-        setExpensesPercentage(expensesPercentage);
-        setSavingsPercentage(savingsPercentage);
+        // Calcular e atualizar as percentagens de variação
+        setIncomePercentage(calculatePercentage(income, prevIncome));
+        setExpensesPercentage(calculatePercentage(Math.abs(expenses), Math.abs(prevExpenses)));
+        setSavingsPercentage(calculatePercentage(savings, prevSavings));
       } catch (err) {
         console.error("Erro ao buscar dados do dashboard:", err);
-        setError("Não foi possível carregar os dados do dashboard. Por favor, tente novamente mais tarde.");
+        if (err.response?.status === 401) {
+          navigate('/login');
+        } else {
+          setError("Não foi possível carregar os dados do dashboard. Por favor, tente novamente mais tarde.");
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchDashboardData();
-  }, []);
+  }, [navigate]);
 
   // Componente Card reutilizável
   const Card = ({ title, value, icon: Icon, percentage, isNegative = false }) => (
