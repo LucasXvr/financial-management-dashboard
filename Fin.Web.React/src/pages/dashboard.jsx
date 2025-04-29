@@ -79,14 +79,14 @@ function Dashboard() {
           prevIncomeResponse,
           prevExpensesResponse
         ] = await Promise.all([
-          api.get('/current-balance'),
-          api.get(`/total-income?startDate=${startDateStr}&endDate=${endDateStr}`),
-          api.get(`/total-expenses?startDate=${startDateStr}&endDate=${endDateStr}`),
-          api.get(`/savings?startDate=${startDateStr}&endDate=${endDateStr}`),
-          api.get('/balance-over-time?months=6'),
-          api.get(`/expenses-by-category?startDate=${startDateStr}&endDate=${endDateStr}`),
-          api.get(`/total-income?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`),
-          api.get(`/total-expenses?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`)
+          api.get('/v1/financial-reports/current-balance'),
+          api.get(`/v1/financial-reports/total-income?startDate=${startDateStr}&endDate=${endDateStr}`),
+          api.get(`/v1/financial-reports/total-expenses?startDate=${startDateStr}&endDate=${endDateStr}`),
+          api.get(`/v1/financial-reports/savings?startDate=${startDateStr}&endDate=${endDateStr}`),
+          api.get('/v1/financial-reports/balance-over-time?months=6'),
+          api.get(`/v1/financial-reports/expenses-by-category?startDate=${startDateStr}&endDate=${endDateStr}`),
+          api.get(`/v1/financial-reports/total-income?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`),
+          api.get(`/v1/financial-reports/total-expenses?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`)
         ]);
 
         // Processar as respostas
