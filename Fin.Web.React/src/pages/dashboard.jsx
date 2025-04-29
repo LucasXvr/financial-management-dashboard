@@ -3,9 +3,13 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { DollarSign, TrendingUp, CreditCard, PieChart } from 'lucide-react';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 function Dashboard() {
   const navigate = useNavigate();
+
+  // Usar isAuthenticated como valor booleano do contexto
+  const { isAuthenticated, loading } = useAuth();
 
   // Estados para armazenar os dados da API
   const [currentBalance, setCurrentBalance] = useState(0);
@@ -24,12 +28,17 @@ function Dashboard() {
 
   // Verificar autenticação ao carregar o componente
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    // Aguardar o carregamento do contexto de autenticação
+    if (loading) return;
+    
+    // Verificar se está autenticado
+    if (!isAuthenticated) {
       navigate('/login');
       return;
     }
-  }, [navigate]);
+    
+    fetchDashboardData();
+  }, [navigate, isAuthenticated, loading]);
 
   // Função para formatar valores monetários
   const formatCurrency = (value) => {
@@ -45,98 +54,108 @@ function Dashboard() {
     const percentage = ((current - previous) / Math.abs(previous)) * 100;
     return `${percentage >= 0 ? '+' : ''}${percentage.toFixed(1)}%`;
   };
+  
+  // Função para buscar os dados do dashboard
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
+    setError(null);
 
-  // Obter dados iniciais ao carregar o componente
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      setIsLoading(true);
-      setError(null);
+    try {
+      // Configurar o período para análise (mês atual)
+      const today = new Date();
+      const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
-      try {
-        // Configurar o período para análise (mês atual)
-        const today = new Date();
-        const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-        const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
 
-        const startDateStr = startDate.toISOString().split('T')[0];
-        const endDateStr = endDate.toISOString().split('T')[0];
+      // Obter dados do mês anterior para comparação
+      const prevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
 
-        // Obter dados do mês anterior para comparação
-        const prevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+      const prevStartDateStr = prevMonth.toISOString().split('T')[0];
+      const prevEndDateStr = prevMonthEnd.toISOString().split('T')[0];
 
-        const prevStartDateStr = prevMonth.toISOString().split('T')[0];
-        const prevEndDateStr = prevMonthEnd.toISOString().split('T')[0];
+      // Chamadas paralelas à API usando axios
+      const [
+        balanceResponse,
+        incomeResponse,
+        expensesResponse,
+        savingsResponse,
+        balanceOverTimeResponse,
+        expensesByCategoryResponse,
+        prevIncomeResponse,
+        prevExpensesResponse
+      ] = await Promise.all([
+        api.get('/v1/financial-reports/current-balance'),
+        api.get(`/v1/financial-reports/total-income?startDate=${startDateStr}&endDate=${endDateStr}`),
+        api.get(`/v1/financial-reports/total-expenses?startDate=${startDateStr}&endDate=${endDateStr}`),
+        api.get(`/v1/financial-reports/savings?startDate=${startDateStr}&endDate=${endDateStr}`),
+        api.get('/v1/financial-reports/balance-over-time?months=6'),
+        api.get(`/v1/financial-reports/expenses-by-category?startDate=${startDateStr}&endDate=${endDateStr}`),
+        api.get(`/v1/financial-reports/total-income?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`),
+        api.get(`/v1/financial-reports/total-expenses?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`)
+      ]);
 
-        // Chamadas paralelas à API usando axios
-        const [
-          balanceResponse,
-          incomeResponse,
-          expensesResponse,
-          savingsResponse,
-          balanceOverTimeResponse,
-          expensesByCategoryResponse,
-          prevIncomeResponse,
-          prevExpensesResponse
-        ] = await Promise.all([
-          api.get('/v1/financial-reports/current-balance'),
-          api.get(`/v1/financial-reports/total-income?startDate=${startDateStr}&endDate=${endDateStr}`),
-          api.get(`/v1/financial-reports/total-expenses?startDate=${startDateStr}&endDate=${endDateStr}`),
-          api.get(`/v1/financial-reports/savings?startDate=${startDateStr}&endDate=${endDateStr}`),
-          api.get('/v1/financial-reports/balance-over-time?months=6'),
-          api.get(`/v1/financial-reports/expenses-by-category?startDate=${startDateStr}&endDate=${endDateStr}`),
-          api.get(`/v1/financial-reports/total-income?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`),
-          api.get(`/v1/financial-reports/total-expenses?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`)
-        ]);
+      // Processar as respostas
+      const balance = balanceResponse.data;
+      const income = incomeResponse.data;
+      const expenses = expensesResponse.data;
+      const savings = savingsResponse.data;
+      const balanceData = balanceOverTimeResponse.data;
+      const expensesData = expensesByCategoryResponse.data;
+      const prevIncome = prevIncomeResponse.data;
+      const prevExpenses = prevExpensesResponse.data;
 
-        // Processar as respostas
-        const balance = balanceResponse.data;
-        const income = incomeResponse.data;
-        const expenses = expensesResponse.data;
-        const savings = savingsResponse.data;
-        const balanceData = balanceOverTimeResponse.data;
-        const expensesData = expensesByCategoryResponse.data;
-        const prevIncome = prevIncomeResponse.data;
-        const prevExpenses = prevExpensesResponse.data;
+      // Calcular a economia do mês anterior para comparação
+      const prevSavings = prevIncome - Math.abs(prevExpenses);
 
-        // Calcular a economia do mês anterior para comparação
-        const prevSavings = prevIncome - Math.abs(prevExpenses);
+      // Atualizar os estados com os dados da API
+      setCurrentBalance(balance);
+      setTotalIncome(income);
+      setTotalExpenses(Math.abs(expenses));
+      setTotalSavings(savings);
 
-        // Atualizar os estados com os dados da API
-        setCurrentBalance(balance);
-        setTotalIncome(income);
-        setTotalExpenses(Math.abs(expenses));
-        setTotalSavings(savings);
+      // Formatar dados para os gráficos
+      setBalanceOverTime(balanceData.map(item => ({
+        month: item.month,
+        balance: item.balance
+      })));
 
-        // Formatar dados para os gráficos
-        setBalanceOverTime(balanceData.map(item => ({
-          month: item.month,
-          balance: item.balance
-        })));
+      setExpensesByCategory(expensesData.map(item => ({
+        category: item.category,
+        amount: Math.abs(item.amount)
+      })));
 
-        setExpensesByCategory(expensesData.map(item => ({
-          category: item.category,
-          amount: Math.abs(item.amount)
-        })));
-
-        // Calcular e atualizar as percentagens de variação
-        setIncomePercentage(calculatePercentage(income, prevIncome));
-        setExpensesPercentage(calculatePercentage(Math.abs(expenses), Math.abs(prevExpenses)));
-        setSavingsPercentage(calculatePercentage(savings, prevSavings));
-      } catch (err) {
-        console.error("Erro ao buscar dados do dashboard:", err);
-        if (err.response?.status === 401) {
-          navigate('/login');
-        } else {
-          setError("Não foi possível carregar os dados do dashboard. Por favor, tente novamente mais tarde.");
-        }
-      } finally {
-        setIsLoading(false);
+      // Calcular e atualizar as percentagens de variação
+      setIncomePercentage(calculatePercentage(income, prevIncome));
+      setExpensesPercentage(calculatePercentage(Math.abs(expenses), Math.abs(prevExpenses)));
+      setSavingsPercentage(calculatePercentage(savings, prevSavings));
+    } catch (err) {
+      console.error("Erro ao buscar dados do dashboard:", err);
+      if (err.response?.status === 401) {
+        navigate('/login');
+      } else {
+        setError("Não foi possível carregar os dados do dashboard. Por favor, tente novamente mais tarde.");
       }
-    };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  // Verificar autenticação ao carregar o componente
+  useEffect(() => {
+    // Aguardar o carregamento do contexto de autenticação
+    if (loading) return;
+    
+    // Verificar se está autenticado
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    
     fetchDashboardData();
-  }, [navigate]);
+  }, [navigate, isAuthenticated, loading]);
 
   // Componente Card reutilizável
   const Card = ({ title, value, icon: Icon, percentage, isNegative = false }) => (
@@ -151,6 +170,18 @@ function Dashboard() {
       </p>
     </div>
   );
+
+  // Exibir mensagem de carregamento quando o AuthContext estiver carregando
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Verificando autenticação...</p>
+        </div>
+      </div>
+    );
+  }  
 
   // Exibir mensagem de carregamento
   if (isLoading) {
@@ -183,9 +214,9 @@ function Dashboard() {
     <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-200">Painel Principal</h2>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
       <Card title="Saldo Atual" value={formatCurrency(currentBalance)} icon={DollarSign} percentage="+20,1%" />
-      <Card title="Receita" value={formatCurrency(totalIncome)} icon={TrendingUp} percentage="+2,5%" />
-      <Card title="Despesas" value={formatCurrency(totalExpenses)} icon={CreditCard} percentage="+4,3%" isNegative />
-      <Card title="Economia" value={formatCurrency(totalSavings)} icon={PieChart} percentage="+18,7%" />
+      <Card title="Receita" value={formatCurrency(totalIncome)} icon={TrendingUp} percentage={incomePercentage} />
+      <Card title="Despesas" value={formatCurrency(totalExpenses)} icon={CreditCard} percentage={expensesPercentage} isNegative />
+      <Card title="Economia" value={formatCurrency(totalSavings)} icon={PieChart} percentage={savingsPercentage} />
     </div>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">

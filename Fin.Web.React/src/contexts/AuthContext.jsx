@@ -4,19 +4,48 @@ import { authService } from '../services/api';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
+  const [currentUser, setCurrentUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar autenticação ao carregar a aplicação
-    setIsAuthenticated(authService.isAuthenticated());
-    setLoading(false);
+     // Verificar autenticação ao carregar a aplicação
+     const checkAuth = async () => {
+      const hasToken = authService.isAuthenticated();
+      setIsAuthenticated(hasToken);
+      
+      if (hasToken) {
+        try {
+          // Tenta carregar os dados do usuário se houver token
+          const userData = await authService.getCurrentUser();
+          setCurrentUser(userData);
+        } catch (error) {
+          console.error('Erro ao obter dados do usuário:', error);
+          // Se falhar em obter os dados do usuário, provavelmente o token é inválido
+          setIsAuthenticated(false);
+          authService.logout();
+        }
+      }
+      
+      setLoading(false);
+    };
+    
+    checkAuth();
   }, []);
 
   const login = async (email, password) => {
     try {
       const response = await authService.login(email, password);
       setIsAuthenticated(true);
+      
+      // Após o login bem-sucedido, obtenha os dados do usuário
+      try {
+        const userData = await authService.getCurrentUser();
+        setCurrentUser(userData);
+      } catch (userError) {
+        console.error('Erro ao obter dados do usuário após login:', userError);
+      }
+      
       return response;
     } catch (error) {
       setIsAuthenticated(false);
@@ -35,7 +64,9 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     authService.logout();
+    setCurrentUser(null);
     setIsAuthenticated(false);
+    // A navegação deverá ser feita no componente que chama logout
   };
 
   return (
