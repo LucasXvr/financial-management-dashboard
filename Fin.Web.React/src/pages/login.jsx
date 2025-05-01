@@ -14,17 +14,23 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    console.log('🔄 Login: Iniciando processo de login');
     setErrorMsg('');
     setLoading(true);
 
     try {
-      await login(email, password);
+      console.log('🔑 Login: Chamando função de login do AuthContext');
+      const response = await login(email, password);
+      console.log('✅ Login: Login bem sucedido, aguardando 2 segundos antes de redirecionar');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('🔄 Login: Redirecionando para dashboard');
       navigate('/dashboard');
     } catch (error) {
-      console.error('Erro ao fazer login:', error);
+      console.error('❌ Login: Erro ao fazer login:', error);
       setErrorMsg(error.message || 'Credenciais inválidas. Verifique e tente novamente.');
     } finally {
       setLoading(false);
+      console.log('✅ Login: Processo de login concluído');
     }
   };
 

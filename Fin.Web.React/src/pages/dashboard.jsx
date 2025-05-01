@@ -28,15 +28,22 @@ function Dashboard() {
 
   // Verificar autenticação ao carregar o componente
   useEffect(() => {
-    // Aguardar o carregamento do contexto de autenticação
-    if (loading) return;
+    console.log('🔄 Dashboard: Verificando autenticação');
+    console.log('🔑 Dashboard: Estado de autenticação:', isAuthenticated);
+    console.log('⏳ Dashboard: Estado de loading:', loading);
     
-    // Verificar se está autenticado
+    if (loading) {
+      console.log('⏳ Dashboard: Aguardando carregamento do contexto');
+      return;
+    }
+    
     if (!isAuthenticated) {
+      console.log('❌ Dashboard: Usuário não autenticado, redirecionando para login');
       navigate('/login');
       return;
     }
     
+    console.log('✅ Dashboard: Usuário autenticado, buscando dados');
     fetchDashboardData();
   }, [navigate, isAuthenticated, loading]);
 
@@ -57,11 +64,11 @@ function Dashboard() {
   
   // Função para buscar os dados do dashboard
   const fetchDashboardData = async () => {
+    console.log('🔄 Dashboard: Iniciando busca de dados');
     setIsLoading(true);
     setError(null);
 
     try {
-      // Configurar o período para análise (mês atual)
       const today = new Date();
       const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
       const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -69,35 +76,52 @@ function Dashboard() {
       const startDateStr = startDate.toISOString().split('T')[0];
       const endDateStr = endDate.toISOString().split('T')[0];
 
-      // Obter dados do mês anterior para comparação
       const prevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
       const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
 
       const prevStartDateStr = prevMonth.toISOString().split('T')[0];
       const prevEndDateStr = prevMonthEnd.toISOString().split('T')[0];
 
-      // Chamadas paralelas à API usando axios
-      const [
-        balanceResponse,
-        incomeResponse,
-        expensesResponse,
-        savingsResponse,
-        balanceOverTimeResponse,
-        expensesByCategoryResponse,
-        prevIncomeResponse,
-        prevExpensesResponse
-      ] = await Promise.all([
-        api.get('/v1/financial-reports/current-balance'),
-        api.get(`/v1/financial-reports/total-income?startDate=${startDateStr}&endDate=${endDateStr}`),
-        api.get(`/v1/financial-reports/total-expenses?startDate=${startDateStr}&endDate=${endDateStr}`),
-        api.get(`/v1/financial-reports/savings?startDate=${startDateStr}&endDate=${endDateStr}`),
-        api.get('/v1/financial-reports/balance-over-time?months=6'),
-        api.get(`/v1/financial-reports/expenses-by-category?startDate=${startDateStr}&endDate=${endDateStr}`),
-        api.get(`/v1/financial-reports/total-income?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`),
-        api.get(`/v1/financial-reports/total-expenses?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`)
-      ]);
+      console.log('📅 Dashboard: Período atual:', startDateStr, 'até', endDateStr);
+      console.log('📅 Dashboard: Período anterior:', prevStartDateStr, 'até', prevEndDateStr);
 
-      // Processar as respostas
+      console.log('🔄 Dashboard: Iniciando chamadas à API');
+      
+      // Log detalhado de cada chamada à API
+      console.log('🔍 Dashboard: Chamando /v1/financial-reports/current-balance');
+      const balanceResponse = await api.get('/v1/financial-reports/current-balance');
+      console.log('✅ Dashboard: Resposta do saldo atual:', balanceResponse.data);
+
+      console.log('🔍 Dashboard: Chamando /v1/financial-reports/total-income');
+      const incomeResponse = await api.get(`/v1/financial-reports/total-income?startDate=${startDateStr}&endDate=${endDateStr}`);
+      console.log('✅ Dashboard: Resposta da receita:', incomeResponse.data);
+
+      console.log('🔍 Dashboard: Chamando /v1/financial-reports/total-expenses');
+      const expensesResponse = await api.get(`/v1/financial-reports/total-expenses?startDate=${startDateStr}&endDate=${endDateStr}`);
+      console.log('✅ Dashboard: Resposta das despesas:', expensesResponse.data);
+
+      console.log('🔍 Dashboard: Chamando /v1/financial-reports/savings');
+      const savingsResponse = await api.get(`/v1/financial-reports/savings?startDate=${startDateStr}&endDate=${endDateStr}`);
+      console.log('✅ Dashboard: Resposta da economia:', savingsResponse.data);
+
+      console.log('🔍 Dashboard: Chamando /v1/financial-reports/balance-over-time');
+      const balanceOverTimeResponse = await api.get('/v1/financial-reports/balance-over-time?months=6');
+      console.log('✅ Dashboard: Resposta do saldo ao longo do tempo:', balanceOverTimeResponse.data);
+
+      console.log('🔍 Dashboard: Chamando /v1/financial-reports/expenses-by-category');
+      const expensesByCategoryResponse = await api.get(`/v1/financial-reports/expenses-by-category?startDate=${startDateStr}&endDate=${endDateStr}`);
+      console.log('✅ Dashboard: Resposta das despesas por categoria:', expensesByCategoryResponse.data);
+
+      console.log('🔍 Dashboard: Chamando /v1/financial-reports/total-income (período anterior)');
+      const prevIncomeResponse = await api.get(`/v1/financial-reports/total-income?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`);
+      console.log('✅ Dashboard: Resposta da receita anterior:', prevIncomeResponse.data);
+
+      console.log('🔍 Dashboard: Chamando /v1/financial-reports/total-expenses (período anterior)');
+      const prevExpensesResponse = await api.get(`/v1/financial-reports/total-expenses?startDate=${prevStartDateStr}&endDate=${prevEndDateStr}`);
+      console.log('✅ Dashboard: Resposta das despesas anteriores:', prevExpensesResponse.data);
+
+      console.log('✅ Dashboard: Todas as chamadas à API concluídas');
+
       const balance = balanceResponse.data;
       const income = incomeResponse.data;
       const expenses = expensesResponse.data;
@@ -107,16 +131,22 @@ function Dashboard() {
       const prevIncome = prevIncomeResponse.data;
       const prevExpenses = prevExpensesResponse.data;
 
-      // Calcular a economia do mês anterior para comparação
+      console.log('💰 Dashboard: Dados recebidos:', {
+        balance,
+        income,
+        expenses,
+        savings,
+        prevIncome,
+        prevExpenses
+      });
+
       const prevSavings = prevIncome - Math.abs(prevExpenses);
 
-      // Atualizar os estados com os dados da API
       setCurrentBalance(balance);
       setTotalIncome(income);
       setTotalExpenses(Math.abs(expenses));
       setTotalSavings(savings);
 
-      // Formatar dados para os gráficos
       setBalanceOverTime(balanceData.map(item => ({
         month: item.month,
         balance: item.balance
@@ -127,35 +157,24 @@ function Dashboard() {
         amount: Math.abs(item.amount)
       })));
 
-      // Calcular e atualizar as percentagens de variação
       setIncomePercentage(calculatePercentage(income, prevIncome));
       setExpensesPercentage(calculatePercentage(Math.abs(expenses), Math.abs(prevExpenses)));
       setSavingsPercentage(calculatePercentage(savings, prevSavings));
+
+      console.log('✅ Dashboard: Dados processados e estados atualizados');
     } catch (err) {
-      console.error("Erro ao buscar dados do dashboard:", err);
+      console.error('❌ Dashboard: Erro ao buscar dados:', err);
       if (err.response?.status === 401) {
+        console.log('🔒 Dashboard: Não autorizado, redirecionando para login');
         navigate('/login');
       } else {
         setError("Não foi possível carregar os dados do dashboard. Por favor, tente novamente mais tarde.");
       }
     } finally {
       setIsLoading(false);
+      console.log('✅ Dashboard: Busca de dados concluída');
     }
   };
-
-  // Verificar autenticação ao carregar o componente
-  useEffect(() => {
-    // Aguardar o carregamento do contexto de autenticação
-    if (loading) return;
-    
-    // Verificar se está autenticado
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    
-    fetchDashboardData();
-  }, [navigate, isAuthenticated, loading]);
 
   // Componente Card reutilizável
   const Card = ({ title, value, icon: Icon, percentage, isNegative = false }) => (
