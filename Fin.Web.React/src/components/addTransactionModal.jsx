@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { X } from 'lucide-react';
 import { NumericFormat } from "react-number-format";
+import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const AddTransactionModal = ({ isOpen, onClose, onAddTransaction, transaction, onEditTransaction }) => {
+  const navigate = useNavigate();
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
@@ -13,10 +15,11 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction, transaction, o
   const [categories, setCategories] = useState([]);
   const [pageNumber, setPageNumber] = useState(1); 
   const [totalPages, setTotalPages] = useState(0);
+  const [error, setError] = useState(null);
 
   const loadCategories = async (page = 1) => {
     try {
-      const response = await axios.get(`http://localhost:5110/v1/categories`, {
+      const response = await api.get('/v1/categories', {
         params: {
           pageNumber: page,
           pageSize: 25
@@ -24,8 +27,14 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction, transaction, o
       });
       setCategories(response.data.data);
       setTotalPages(response.data.totalPages);
+      setError(null);
     } catch (error) {
       console.error("Erro ao carregar categorias", error);
+      if (error.response?.status === 401) {
+        navigate('/login');
+      } else {
+        setError('Erro ao carregar categorias. Por favor, tente novamente.');
+      }
     }
   };
 
@@ -56,6 +65,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction, transaction, o
     if (!description.trim() || !amount || !date) return;
 
     setLoading(true);
+    setError(null);
     try {
       const formattedDate = new Date(date).toISOString();
       const transactionData = {
@@ -67,24 +77,20 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction, transaction, o
       };
 
       if (transaction) {
-        const response = await axios.put(`http://localhost:5110/v1/transactions/${transaction.id}`, transactionData);
+        const response = await api.put(`/v1/transactions/${transaction.id}`, transactionData);
         onEditTransaction(response.data);
       } else {
-        const response = await axios.post('http://localhost:5110/v1/transactions', {
-          ...transactionData,
-          userId: '123',
-        });
+        const response = await api.post('/v1/transactions', transactionData);
         onAddTransaction(response.data);
       }
 
       onClose();
     } catch (error) {
-      if (error.response) {
-        console.error('Erro ao salvar transação:', error.response.data);
-        alert(`Erro: ${error.response.data.message || 'Erro ao salvar transação'}`);
+      console.error('Erro ao salvar transação:', error);
+      if (error.response?.status === 401) {
+        navigate('/login');
       } else {
-        console.error('Erro desconhecido:', error);
-        alert('Erro desconhecido ao salvar transação');
+        setError(error.response?.data?.message || 'Erro ao salvar transação. Por favor, tente novamente.');
       }
     } finally {
       setLoading(false);
@@ -102,6 +108,13 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction, transaction, o
             <X size={24} />
           </button>
         </div>
+
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

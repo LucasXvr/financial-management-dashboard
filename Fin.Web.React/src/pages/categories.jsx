@@ -1,25 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import AddCategoryModal from '../components/addCategoryModal';
 import { Edit, Trash2 } from 'lucide-react';
+import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const Categories = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [categories, setCategories] = useState([]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
+  const [error, setError] = useState(null);
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:5110/v1/categories', {
+      const response = await api.get('/v1/categories', {
         params: {
           pageNumber: 1,
           pageSize: 25,
         }
       });
       setCategories(response.data.data);
+      setError(null);
     } catch (error) {
       console.error('Erro ao buscar categorias:', error);
+      if (error.response?.status === 401) {
+        navigate('/login');
+      } else {
+        setError('Erro ao carregar categorias. Por favor, tente novamente.');
+      }
     }
   };
 
@@ -44,13 +53,21 @@ const Categories = () => {
   };
 
   const handleDeleteCategory = async (categoryId) => {
-    try {
-      await axios.delete(`http://localhost:5110/v1/categories/${categoryId}`);
+    if (!window.confirm('Tem certeza que deseja excluir esta categoria?')) {
+      return;
+    }
 
+    try {
+      await api.delete(`/v1/categories/${categoryId}`);
       setCategories(categories.filter(c => c.id !== categoryId));
+      setError(null);
     } catch (error) {
       console.error('Erro ao excluir categoria:', error);
-      alert('Erro ao excluir categoria');
+      if (error.response?.status === 401) {
+        navigate('/login');
+      } else {
+        setError('Erro ao excluir categoria. Por favor, tente novamente.');
+      }
     }
   };
 
@@ -64,6 +81,12 @@ const Categories = () => {
       <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
         Gerenciar Categorias
       </h2>
+
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
 
       <div className="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
         <div className="relative flex-grow">

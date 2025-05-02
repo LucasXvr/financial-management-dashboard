@@ -25,9 +25,18 @@ export default function Header() {
     document.documentElement.classList.toggle('dark');
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    if (window.confirm('Tem certeza que deseja sair?')) {
+      try {
+        await logout();
+        navigate('/login');
+      } catch (error) {
+        console.error('Erro ao fazer logout:', error);
+        // Força o logout mesmo se houver erro
+        localStorage.removeItem('token');
+        navigate('/login');
+      }
+    }
   };
 
   return (

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Search, Filter, Edit, Trash2 } from 'lucide-react';
 import AddTransactionModal from '../components/addTransactionModal';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 
 const Transactions = () => {
   const navigate = useNavigate();
@@ -13,10 +13,11 @@ const Transactions = () => {
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [endDate, setEndDate] = useState(new Date().toISOString().slice(0, 10));
+  const [error, setError] = useState(null);
 
   const fetchCategory = async (categoryId) => {
     try {
-      const response = await axios.get(`http://localhost:5110/v1/categories/${categoryId}`);
+      const response = await api.get(`/v1/categories/${categoryId}`);
       return response.data.data;
     } catch (error) {
       console.error('Erro ao buscar categoria:', error);
@@ -26,7 +27,7 @@ const Transactions = () => {
 
   const fetchTransactions = async () => {
     try {
-      const response = await axios.get('http://localhost:5110/v1/transactions', {
+      const response = await api.get('/v1/transactions', {
         params: {
           pageNumber: 1,
           pageSize: 25,
@@ -44,9 +45,15 @@ const Transactions = () => {
         return transaction;
       }));
 
-      setTransactions(transactionsWithCategories);      
+      setTransactions(transactionsWithCategories);
+      setError(null);
     } catch (error) {
       console.error('Erro ao buscar transações:', error);
+      if (error.response?.status === 401) {
+        navigate('/login');
+      } else {
+        setError('Erro ao carregar transações. Por favor, tente novamente.');
+      }
     }
   };
 
@@ -79,16 +86,23 @@ const Transactions = () => {
   };
 
   const handleDelete = async (transactionId) => {
+    if (!window.confirm('Tem certeza que deseja excluir esta transação?')) {
+      return;
+    }
+
     try {
-      // Envia a requisição DELETE para o backend
-      await axios.delete(`http://localhost:5110/v1/transactions/${transactionId}`);
-      
-      // Remove a transação da lista local após excluir no servidor
+      await api.delete(`/v1/transactions/${transactionId}`);
       setTransactions((prevTransactions) =>
         prevTransactions.filter((transaction) => transaction.id !== transactionId)
       );
+      setError(null);
     } catch (error) {
       console.error('Erro ao excluir transação:', error);
+      if (error.response?.status === 401) {
+        navigate('/login');
+      } else {
+        setError('Erro ao excluir transação. Por favor, tente novamente.');
+      }
     }
   };
 
@@ -102,6 +116,13 @@ const Transactions = () => {
       <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
         Transações
       </h2>
+
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
+      )}
+
       <div className="mb-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
         <div className="relative flex-grow">
           <input
@@ -119,13 +140,13 @@ const Transactions = () => {
             type="date" 
             value={startDate} 
             onChange={(e) => setStartDate(e.target.value)} 
-            className="border p-2 rounded"
+            className="border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
           <input 
             type="date"
             value={endDate} 
             onChange={(e) => setEndDate(e.target.value)} 
-            className="border p-2 rounded"
+            className="border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
           />
 
           <button 

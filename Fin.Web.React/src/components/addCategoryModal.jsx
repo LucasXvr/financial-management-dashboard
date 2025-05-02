@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { X } from 'lucide-react';
+import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const AddCategoryModal = ({ isOpen, onClose, onAddCategory, category, onEditCategory }) => {
+  const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (category) {
@@ -23,17 +26,17 @@ const AddCategoryModal = ({ isOpen, onClose, onAddCategory, category, onEditCate
     if (!title.trim()) return;
 
     setLoading(true);
+    setError(null);
     try {
       if (category) {
-        const response = await axios.put(`http://localhost:5110/v1/categories/${category.id}`, {
+        const response = await api.put(`/v1/categories/${category.id}`, {
           title,
           description,
         });
         onEditCategory(response.data.data);
       }
       else {
-        const response = await axios.post('http://localhost:5110/v1/categories', {
-          userId: '123', // 🔹 Mock temporário do usuário
+        const response = await api.post('/v1/categories', {
           title,
           description,
         });
@@ -44,8 +47,12 @@ const AddCategoryModal = ({ isOpen, onClose, onAddCategory, category, onEditCate
       setDescription('');
       onClose();
     } catch (error) {
-      console.error('Erro ao adicionar categoria:', error);
-      alert('Erro ao adicionar categoria');
+      console.error('Erro ao salvar categoria:', error);
+      if (error.response?.status === 401) {
+        navigate('/login');
+      } else {
+        setError(error.response?.data?.message || 'Erro ao salvar categoria. Por favor, tente novamente.');
+      }
     } finally {
       setLoading(false);
     }
@@ -62,6 +69,12 @@ const AddCategoryModal = ({ isOpen, onClose, onAddCategory, category, onEditCate
             <X size={24} />
           </button>
         </div>
+
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
