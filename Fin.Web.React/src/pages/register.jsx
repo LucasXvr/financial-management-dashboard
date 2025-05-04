@@ -31,10 +31,19 @@ function Register() {
       setErrorMsg('Por favor, insira uma senha');
       return false;
     }
-    if (formData.password.length < 6) {
-      setErrorMsg('A senha deve ter pelo menos 6 caracteres');
+
+    // Validar requisitos da senha
+    const hasDigit = /\d/.test(formData.password);
+    const hasLowercase = /[a-z]/.test(formData.password);
+    const hasUppercase = /[A-Z]/.test(formData.password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(formData.password);
+    const hasMinLength = formData.password.length >= 8;
+
+    if (!hasDigit || !hasLowercase || !hasUppercase || !hasSpecialChar || !hasMinLength) {
+      setErrorMsg('A senha deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas, números e caracteres especiais');
       return false;
     }
+
     if (formData.password !== formData.confirmPassword) {
       setErrorMsg('As senhas não coincidem');
       return false;
@@ -70,11 +79,11 @@ function Register() {
         password: formData.password
       });
       
-      setSuccessMsg('Conta criada com sucesso! Redirecionando para o login...');
+      setSuccessMsg('Conta criada com sucesso! Redirecionando para o dashboard...');
       
       // Redireciona após 2 segundos
       setTimeout(() => {
-        navigate('/login');
+        navigate('/dashboard');
       }, 2000);
       
     } catch (error) {

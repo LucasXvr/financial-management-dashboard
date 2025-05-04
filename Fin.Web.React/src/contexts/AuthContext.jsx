@@ -100,17 +100,73 @@ export const AuthProvider = ({ children }) => {
   // Função de registro
   const register = async (userData) => {
     console.log('👤 Iniciando processo de registro');
+    console.log('📝 Dados recebidos:', { email: userData.email, name: userData.name });
     setLoading(true);
     setError(null);
     
     try {
-      const response = await api.post('/v1/identity/register', userData);
+      console.log('📤 Enviando requisição de registro para o servidor...');
+      console.log('📦 Payload:', { email: userData.email, password: userData.password });
+      const response = await api.post('/v1/identity/register', {
+        email: userData.email,
+        password: userData.password
+      });
       console.log('✅ Registro realizado com sucesso');
+      console.log('📥 Resposta do servidor:', response.data);
+      
+      // Fazer login automaticamente após o registro
+      console.log('🔑 Iniciando login automático após registro');
+      console.log('📤 Enviando requisição de login...');
+      const loginResponse = await api.post('/v1/identity/login', {
+        email: userData.email,
+        password: userData.password
+      });
+      console.log('📥 Resposta do login:', loginResponse.data);
+      
+      const token = loginResponse.data?.token || loginResponse.data?.accessToken || loginResponse.data?.data?.token;
+      if (token) {
+        console.log('🔒 Token recebido, armazenando no localStorage');
+        localStorage.setItem('token', token);
+        console.log('✅ Token armazenado com sucesso');
+        
+        // Atualizar o estado de autenticação
+        const userInfo = {
+          email: userData.email,
+          name: userData.name,
+          id: 'unknown'
+        };
+        console.log('👤 Atualizando estado do usuário:', userInfo);
+        setIsAuthenticated(true);
+        setUser(userInfo);
+        console.log('✅ Estado do usuário atualizado');
+      } else {
+        console.warn('⚠️ Token não encontrado na resposta do login');
+      }
+      
       return response;
     } catch (err) {
       console.error('❌ Erro no processo de registro:', err);
-      setError(err.message || "Não foi possível registrar o usuário.");
-      throw err;
+      console.error('📄 Detalhes do erro:', {
+        status: err.response?.status,
+        data: err.response?.data,
+        message: err.message,
+        validationErrors: err.response?.data?.errors
+      });
+
+      let errorMessage = "Não foi possível registrar o usuário.";
+      
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response?.data?.errors) {
+        // Se houver erros de validação, junte-os em uma mensagem
+        errorMessage = Object.values(err.response.data.errors).flat().join(', ');
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      console.error('❌ Mensagem de erro final:', errorMessage);
+      setError(errorMessage);
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
       console.log('✅ Processo de registro concluído');
