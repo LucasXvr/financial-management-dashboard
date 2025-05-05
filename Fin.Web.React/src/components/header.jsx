@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { PieChart, DollarSign, Wallet, Sun, Moon, Bell, AlignJustify, LogOut } from 'lucide-react';
+import { PieChart, DollarSign, Wallet, Sun, Moon, Bell, AlignJustify, LogOut, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Header() {
@@ -78,7 +78,7 @@ export default function Header() {
             isMenuOpen ? 'flex' : 'hidden'
           } w-full lg:flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-6 mt-4 lg:mt-0 lg:w-auto`}
         >
-          {isAuthenticated && (
+          {isAuthenticated ? (
             <>
               <Link
                 to="/dashboard"
@@ -106,6 +106,23 @@ export default function Header() {
               >
                 <Wallet className="mr-1" size={18} />
                 <span className="text-sm sm:text-base">Orçamento</span>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="flex items-center hover:text-green-300 transition-colors"
+              >
+                <LogIn className="mr-1" size={18} />
+                <span className="text-sm sm:text-base">Entrar</span>
+              </Link>
+              <Link
+                to="/register"
+                className="flex items-center hover:text-green-300 transition-colors"
+              >
+                <UserPlus className="mr-1" size={18} />
+                <span className="text-sm sm:text-base">Cadastrar</span>
               </Link>
             </>
           )}
