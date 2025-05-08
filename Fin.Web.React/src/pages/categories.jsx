@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AddCategoryModal from '../components/addCategoryModal';
+import DeleteConfirmationModal from '../components/deleteConfirmationModal';
+import DeleteSuccessModal from '../components/deleteSuccessModal';
 import { Edit, Trash2 } from 'lucide-react';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +13,10 @@ const Categories = () => {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [error, setError] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteSuccessModalOpen, setDeleteSuccessModalOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchCategories = async () => {
     try {
@@ -52,15 +58,21 @@ const Categories = () => {
     );
   };
 
-  const handleDeleteCategory = async (categoryId) => {
-    if (!window.confirm('Tem certeza que deseja excluir esta categoria?')) {
-      return;
-    }
+  const handleDeleteClick = (category) => {
+    setCategoryToDelete(category);
+    setDeleteModalOpen(true);
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!categoryToDelete) return;
+
+    setDeleteLoading(true);
     try {
-      await api.delete(`/v1/categories/${categoryId}`);
-      setCategories(categories.filter(c => c.id !== categoryId));
+      await api.delete(`/v1/categories/${categoryToDelete.id}`);
+      setCategories(categories.filter(c => c.id !== categoryToDelete.id));
       setError(null);
+      setDeleteModalOpen(false);
+      setDeleteSuccessModalOpen(true);
     } catch (error) {
       console.error('Erro ao excluir categoria:', error);
       if (error.response?.status === 401) {
@@ -68,6 +80,9 @@ const Categories = () => {
       } else {
         setError('Erro ao excluir categoria. Por favor, tente novamente.');
       }
+    } finally {
+      setDeleteLoading(false);
+      setCategoryToDelete(null);
     }
   };
 
@@ -114,13 +129,13 @@ const Categories = () => {
               <span className="text-gray-800 dark:text-gray-200">{category.title}</span>
               <div className="flex space-x-3">
                 <button
-                    onClick={() => handleOpenEditModal(category)}
-                    className="p-2 rounded-md bg-green-100 text-green-600 hover:bg-green-200 dark:bg-blue-100 dark:text-blue-600 dark:hover:bg-blue-200 transition-colors"
-                  >
-                    <Edit className="h-4 w-4" />
+                  onClick={() => handleOpenEditModal(category)}
+                  className="p-2 rounded-md bg-green-100 text-green-600 hover:bg-green-200 dark:bg-blue-100 dark:text-blue-600 dark:hover:bg-blue-200 transition-colors"
+                >
+                  <Edit className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => handleDeleteCategory(category.id)}
+                  onClick={() => handleDeleteClick(category)}
                   className="p-2 rounded-md bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-100 dark:text-red-600 dark:hover:bg-red-200 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" /> 
@@ -133,11 +148,31 @@ const Categories = () => {
 
       <AddCategoryModal
         isOpen={isCategoryModalOpen}
-        onClose={() => setIsCategoryModalOpen(false)}
+        onClose={() => {
+          setIsCategoryModalOpen(false);
+          setEditingCategory(null);
+        }}
         onAddCategory={handleAddCategory}
         onEditCategory={handleEditCategory}
         category={editingCategory}
-      />      
+      />
+
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setCategoryToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title={categoryToDelete?.title}
+        loading={deleteLoading}
+      />
+
+      <DeleteSuccessModal
+        isOpen={deleteSuccessModalOpen}
+        onClose={() => setDeleteSuccessModalOpen(false)}
+        title={categoryToDelete?.title}
+      />
     </div>
   );
 };
