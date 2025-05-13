@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Search, Filter, Edit, Trash2 } from 'lucide-react';
 import AddTransactionModal from '../components/addTransactionModal';
+import DeleteConfirmationModal from '../components/deleteConfirmationModal';
+import DeleteSuccessModal from '../components/deleteSuccessModal';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
@@ -14,6 +16,10 @@ const Transactions = () => {
   const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [endDate, setEndDate] = useState(new Date().toISOString().slice(0, 10));
   const [error, setError] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteSuccessModalOpen, setDeleteSuccessModalOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const fetchCategory = async (categoryId) => {
     try {
@@ -59,7 +65,7 @@ const Transactions = () => {
 
   useEffect(() => {
     fetchTransactions();
-  }, []);
+  }, [startDate, endDate]);
 
   const filteredTransactions = transactions.filter(transaction =>
     transaction.title?.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -67,17 +73,29 @@ const Transactions = () => {
   );
 
   const handleAddTransaction = async (newTransaction) => {
-    setTransactions([...transactions, newTransaction]);
-    await fetchTransactions();
+    try {
+      const category = newTransaction.categoryId ? await fetchCategory(newTransaction.categoryId) : null;
+      const transactionWithCategory = { ...newTransaction, category };
+      setTransactions(prevTransactions => [transactionWithCategory, ...prevTransactions]);
+    } catch (error) {
+      console.error('Erro ao adicionar transação:', error);
+      setError('Erro ao adicionar transação. Por favor, tente novamente.');
+    }
   };
 
   const handleEditTransaction = async (updatedTransaction) => {
-    setTransactions((prevTransactions) =>
-      prevTransactions.map((transaction) => 
-        transaction.id === updatedTransaction.id ? updatedTransaction : transaction
-      )
-    );
-    await fetchTransactions();
+    try {
+      const category = updatedTransaction.categoryId ? await fetchCategory(updatedTransaction.categoryId) : null;
+      const transactionWithCategory = { ...updatedTransaction, category };
+      setTransactions(prevTransactions =>
+        prevTransactions.map(transaction =>
+          transaction.id === updatedTransaction.id ? transactionWithCategory : transaction
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao editar transação:', error);
+      setError('Erro ao editar transação. Por favor, tente novamente.');
+    }
   };
 
   const handleOpenEditModal = (transaction) => {
@@ -85,17 +103,26 @@ const Transactions = () => {
     setIsTransactionModalOpen(true);
   };
 
-  const handleDelete = async (transactionId) => {
-    if (!window.confirm('Tem certeza que deseja excluir esta transação?')) {
-      return;
-    }
+  const handleCloseModal = () => {
+    setIsTransactionModalOpen(false);
+    setEditingTransaction(null);
+  };
 
+  const handleDeleteClick = (transaction) => {
+    setTransactionToDelete(transaction);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!transactionToDelete) return;
+
+    setDeleteLoading(true);
     try {
-      await api.delete(`/v1/transactions/${transactionId}`);
-      setTransactions((prevTransactions) =>
-        prevTransactions.filter((transaction) => transaction.id !== transactionId)
-      );
+      await api.delete(`/v1/transactions/${transactionToDelete.id}`);
+      setTransactions(transactions.filter(t => t.id !== transactionToDelete.id));
       setError(null);
+      setDeleteModalOpen(false);
+      setDeleteSuccessModalOpen(true);
     } catch (error) {
       console.error('Erro ao excluir transação:', error);
       if (error.response?.status === 401) {
@@ -103,6 +130,9 @@ const Transactions = () => {
       } else {
         setError('Erro ao excluir transação. Por favor, tente novamente.');
       }
+    } finally {
+      setDeleteLoading(false);
+      setTransactionToDelete(null);
     }
   };
 
@@ -229,7 +259,7 @@ const Transactions = () => {
                       variant="outline"
                       size="icon"
                       className="p-2 rounded-md bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-100 dark:text-red-600 dark:hover:bg-red-200 transition-colors"
-                      onClick={() => handleDelete(transaction.id)}
+                      onClick={() => handleDeleteClick(transaction)}
                       aria-label="Excluir"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -244,10 +274,27 @@ const Transactions = () => {
 
       <AddTransactionModal
         isOpen={isTransactionModalOpen}
-        onClose={() => setIsTransactionModalOpen(false)}
+        onClose={handleCloseModal}
         onAddTransaction={handleAddTransaction}
         onEditTransaction={handleEditTransaction}
         transaction={editingTransaction}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setTransactionToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title={transactionToDelete?.title}
+        loading={deleteLoading}
+      />
+
+      <DeleteSuccessModal
+        isOpen={deleteSuccessModalOpen}
+        onClose={() => setDeleteSuccessModalOpen(false)}
+        title={transactionToDelete?.title}
       />
     </div>
   );
