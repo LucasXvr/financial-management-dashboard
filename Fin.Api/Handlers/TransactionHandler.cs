@@ -17,8 +17,10 @@ namespace Fin.Api.Handlers
     {
         public async Task<Response<Transaction?>> CreateAsync(CreateTransactionRequest request)
         {
-            if (request is { Type: ETransactionType.Withdraw, Amount: >= 0 })
-                request.Amount *= -1;
+            if (request.Type == ETransactionType.Withdraw)
+                request.Amount = -Math.Abs(request.Amount);
+            else
+                request.Amount = Math.Abs(request.Amount);
 
             try
             {
@@ -129,8 +131,10 @@ namespace Fin.Api.Handlers
 
         public async Task<Response<Transaction?>> UpdateAsync(UpdateTransactionRequest request)
         {
-            if (request is { Type: ETransactionType.Withdraw, Amount: >= 0 })
-                request.Amount *= -1;
+            if (request.Type == ETransactionType.Withdraw)
+                request.Amount = -Math.Abs(request.Amount);
+            else
+                request.Amount = Math.Abs(request.Amount);
 
             try
             {

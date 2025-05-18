@@ -101,9 +101,10 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction, transaction, o
     try {
       const transactionData = {
         title: description,
-        amount: type === '1' ? parseFloat(amount) : -parseFloat(amount),
+        amount: type === '1' ? Math.abs(parseFloat(amount)) : -Math.abs(parseFloat(amount)),
         paidOrReceivedAt: date,
-        categoryId: categoryId ? parseInt(categoryId) : null
+        categoryId: categoryId ? parseInt(categoryId) : null,
+        type: parseInt(type)
       };
 
       if (transaction) {
