@@ -17,5 +17,6 @@ namespace Fin.Core.Models
         public long CategoryId { get; set; }
         public Category Category { get; set; } = null!;
         public string UserId { get; set; } = string.Empty;
+        public bool IsSavings { get; set; }
     }
 }

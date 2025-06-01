@@ -32,7 +32,8 @@ namespace Fin.Api.Handlers
                     Amount = request.Amount,
                     PaidOrReceivedAt = request.PaidOrReceivedAt,
                     Title = request.Title,
-                    Type = request.Type
+                    Type = request.Type,
+                    IsSavings = request.Type == ETransactionType.Saving
                 };
 
                 await context.Transactions.AddAsync(transaction);
@@ -204,9 +205,12 @@ namespace Fin.Api.Handlers
 
         public async Task<decimal> GetSavingsByPeriod(string userId, DateTime start, DateTime end)
         {
-            var income = await GetTotalIncomeByPeriod(userId, start, end);
-            var expenses = await GetTotalExpensesByPeriod(userId, start, end);
-            return income - expenses;
+            return await context.Transactions
+                .Where(t => t.UserId == userId &&
+                           t.Type == ETransactionType.Saving &&
+                           t.PaidOrReceivedAt >= start && 
+                           t.PaidOrReceivedAt <= end)
+                .SumAsync(t => t.Amount);
         }
 
         public async Task<List<BalanceOverTimeDTO>> GetBalanceOverTime(string userId, int months)
@@ -297,6 +301,17 @@ namespace Fin.Api.Handlers
             }
 
             return result;
+        }
+
+        public async Task<IEnumerable<Transaction>> GetSavingsByPeriod(DateTime startDate, DateTime endDate, string userId)
+        {
+            return await context.Transactions
+                .Where(t => t.UserId == userId && 
+                           t.Type == ETransactionType.Saving &&
+                           t.CreatedAt >= startDate && 
+                           t.CreatedAt <= endDate)
+                .OrderByDescending(t => t.CreatedAt)
+                .ToListAsync();
         }
     }
 }

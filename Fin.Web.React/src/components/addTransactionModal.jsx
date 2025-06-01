@@ -72,7 +72,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction, transaction, o
       setDescription(transaction.title);
       setAmount(Math.abs(transaction.amount).toString());
       setDate(transaction.paidOrReceivedAt.split('T')[0]);
-      setType(transaction.amount > 0 ? '1' : '2');
+      setType(transaction.type.toString());
       setCategoryId(transaction.categoryId?.toString() || '');
     } else {
       setDescription('');
@@ -208,6 +208,7 @@ const AddTransactionModal = ({ isOpen, onClose, onAddTransaction, transaction, o
                 >
                   <option value="1">Receita</option>
                   <option value="2">Despesa</option>
+                  <option value="3">Economia</option>
                 </select>
               </div>
 

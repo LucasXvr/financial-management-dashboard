@@ -35,6 +35,9 @@ namespace Fin.Api.Data.Mappings
                 .IsRequired(true)
                 .HasColumnType("VARCHAR")
                 .HasMaxLength(160);
+            builder.Property(x => x.IsSavings)
+                .IsRequired(true)
+                .HasDefaultValue(false);
         }
     }
 }
