@@ -1,58 +1,88 @@
-# 💸 Financial Management
+# 💸 Financial Management Dashboard
 
-Sistema de gerenciamento financeiro pessoal, focado em controle de receitas e despesas mensais, com autenticação de usuários e interface intuitiva. Este projeto foi desenvolvido como parte do meu portfólio, combinando backend em .NET com frontend moderno, com o objetivo de demonstrar habilidades full stack.
+Sistema de gerenciamento financeiro pessoal, focado em controle de receitas e despesas mensais, com autenticação de usuários e interface intuitiva. Este projeto foi desenvolvido como parte do meu portfólio, combinando backend em .NET com frontend moderno em React, com o objetivo de demonstrar habilidades full stack.
 
 ## 🚀 Funcionalidades Implementadas
 
-- ✅ **Landing Page responsiva** com informações do sistema
-- ✅ **Tela de Registro e Login** com formulários validados
-- ✅ **API RESTful** com autenticação de usuários usando JWT
-- ✅ **Endpoints configurados:**
-  - `POST /api/auth/register` - Registro de novos usuários
-  - `POST /api/auth/login` - Login com geração de token JWT
+### Autenticação e Usuários
+- ✅ **Sistema de Autenticação** completo com JWT
+- ✅ **Registro e Login** de usuários
+- ✅ **Recuperação de senha**
+- ✅ **Perfil do usuário** com informações personalizadas
+
+### Gestão Financeira
+- ✅ **Dashboard** com visão geral das finanças
+- ✅ **Transações** (receitas e despesas)
+  - Criação, edição e exclusão de transações
+  - Categorização de transações
+  - Filtros por período e categoria
+- ✅ **Categorias** personalizadas
+  - Gerenciamento de categorias de receitas e despesas
+  - Cores personalizadas para melhor visualização
+
+### Relatórios e Análises
+- ✅ **Relatórios financeiros** mensais
+- ✅ **Gráficos** interativos
+  - Distribuição de gastos por categoria
+  - Evolução de receitas e despesas
+- ✅ **Exportação** de relatórios
 
 ## 📌 Tecnologias Utilizadas
 
-### Backend
-- **ASP.NET Core Web API**
-- **Entity Framework Core**
-- **Autenticação com JWT**
-- **Banco de Dados: SQL Server**
+### Backend (.NET Core)
+- **ASP.NET Core Web API** 8.0
+- **Entity Framework Core** para ORM
+- **SQL Server** como banco de dados
+- **JWT** para autenticação
+- **Swagger/OpenAPI** para documentação
+- **Docker** para containerização
 
-### Frontend
-- **React**
+### Frontend (React)
+- **React** 18+ com Vite
+- **TypeScript** para tipagem estática
+- **TailwindCSS** para estilização
+- **React Router** para navegação
 - **Axios** para requisições HTTP
-- **React Router Dom** para rotas
-- **TailwindCSS**
+- **React Query** para gerenciamento de estado e cache
+- **Chart.js** para gráficos
+- **React Hook Form** para formulários
+- **Zod** para validação
 
-### Outros
-- **Swagger** 
-- **Postman**
+### Ferramentas de Desenvolvimento
+- **Git** para controle de versão
+- **Docker** para containerização
+- **Postman** para testes de API
+- **ESLint** e **Prettier** para padronização de código
 
 ## 🎯 Próximos Passos
 
-- [ ] Testar e integrar os endpoints de autenticação com o front-end
-- [ ] Criar dashboard protegida por autenticação
-- [ ] Implementar fluxo completo de transações:
-  - Adicionar, listar, editar e excluir transações
-- [ ] Criar gráficos e relatórios mensais
-- [ ] Exportar relatórios para Excel
-- [ ] Deploy do sistema (frontend + backend)
+- [ ] Implementar testes automatizados (unitários e integração)
+- [ ] Adicionar CI/CD com GitHub Actions
+- [ ] Implementar sistema de notificações
+- [ ] Adicionar suporte a múltiplas moedas
+- [ ] Implementar backup automático dos dados
+- [ ] Adicionar modo offline com PWA
+- [ ] Melhorar acessibilidade (WCAG)
 
 ## 🧠 Aprendizados
 
 Durante o desenvolvimento deste projeto, aprofundei meus conhecimentos em:
-- Criação e consumo de APIs REST com .NET
-- Manipulação de autenticação com JWT
-- Integração entre frontend e backend com controle de sessão
-- Estruturação de layouts modernos e responsivos
-- Boas práticas de organização de código e estrutura de projeto
-
-## 📷 Demonstrações
-
-*Em breve: prints da tela inicial, login, e dashboard*
+- Arquitetura de software moderna com separação clara de responsabilidades
+- Desenvolvimento de APIs RESTful com .NET Core
+- Autenticação e autorização com JWT
+- Desenvolvimento frontend moderno com React e TypeScript
+- Gerenciamento de estado e cache no frontend
+- Containerização com Docker
+- Boas práticas de segurança em aplicações web
+- Desenvolvimento de interfaces responsivas e acessíveis
 
 ## 📂 Como rodar o projeto
+
+### Pré-requisitos
+- .NET 8.0 SDK
+- Node.js 18+
+- Docker e Docker Compose
+- SQL Server (ou usar o container Docker)
 
 ### Backend
 ```bash
@@ -64,9 +94,21 @@ dotnet run
 
 ### Frontend
 ```bash
-cd financial-management-frontend
+cd Fin.Web.React
 npm install
-npm start
+npm run dev
+```
+
+### Usando Docker
+```bash
+docker-compose up -d
+```
+
+## 📝 Documentação da API
+
+A documentação completa da API está disponível através do Swagger quando o backend estiver rodando:
+```
+http://localhost:5000/swagger
 ```
 
 ## 👤 Autor
