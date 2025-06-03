@@ -22,6 +22,7 @@ function Dashboard() {
   const [error, setError] = useState(null);
 
   // Estados para armazenar as porcentagens de variação
+  const [balancePercentage, setBalancePercentage] = useState("+0.0%");
   const [incomePercentage, setIncomePercentage] = useState("+0.0%");
   const [expensesPercentage, setExpensesPercentage] = useState("+0.0%");
   const [savingsPercentage, setSavingsPercentage] = useState("+0.0%");
@@ -57,9 +58,15 @@ function Dashboard() {
 
   // Função para calcular a variação percentual
   const calculatePercentage = (current, previous) => {
-    if (previous === 0) return "+100%";
+    if (previous === 0) return "-";
+    
+    if (current === 0) return "-100%";
+  
     const percentage = ((current - previous) / Math.abs(previous)) * 100;
-    return `${percentage >= 0 ? '+' : ''}${percentage.toFixed(1)}%`;
+    
+    const formattedPercentage = percentage.toFixed(1);
+    
+    return `${percentage >= 0 ? '+' : ''}${formattedPercentage}%`;
   };
   
   // Função para buscar os dados do dashboard
@@ -157,6 +164,7 @@ function Dashboard() {
         amount: Math.abs(item.amount)
       })));
 
+      setBalancePercentage(calculatePercentage(balance, prevIncome));
       setIncomePercentage(calculatePercentage(income, prevIncome));
       setExpensesPercentage(calculatePercentage(Math.abs(expenses), Math.abs(prevExpenses)));
       setSavingsPercentage(calculatePercentage(savings, prevSavings));
@@ -232,7 +240,7 @@ function Dashboard() {
   return <div className="p-6">
     <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-200">Painel Principal</h2>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-      <Card title="Saldo Atual" value={formatCurrency(currentBalance)} icon={DollarSign} percentage="+20,1%" />
+      <Card title="Saldo Atual" value={formatCurrency(currentBalance)} icon={DollarSign} percentage={balancePercentage} />
       <Card title="Receita" value={formatCurrency(totalIncome)} icon={TrendingUp} percentage={incomePercentage} />
       <Card title="Despesas" value={formatCurrency(totalExpenses)} icon={CreditCard} percentage={expensesPercentage} isNegative />
       <Card title="Economia" value={formatCurrency(totalSavings)} icon={PieChart} percentage={savingsPercentage} />
