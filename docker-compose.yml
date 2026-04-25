@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Fin.Api/Dockerfile
+    ports:
+      - "5110:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=db;Database=FinancialDB;User Id=sa;Password=SenhaDbFinancial01;TrustServerCertificate=True;MultipleActiveResultSets=true;Encrypt=False;Connect Timeout=30
+      - FrontendUrl=http://localhost:5173
+      - BackendUrl=http://localhost:5110
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - financial-network
+    command: >
+      sh -c "sleep 15 &&
+             dotnet ef database update --project /src/Fin.Api --startup-project /src/Fin.Api &&
+             dotnet Fin.Api.dll"
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=SenhaDbFinancial01
+      - MSSQL_PID=Express
+      - MSSQL_TCP_PORT=1433
+      - MSSQL_AGENT_ENABLED=true
+      - MSSQL_ENABLE_HADR=0
+      - MSSQL_MEMORY_LIMIT_MB=2048
+      - MSSQL_TELEMETRY_ENABLED=0
+    ports:
+      - "1200:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+    networks:
+      - financial-network
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "SenhaDbFinancial01" -Q "SELECT 1" -C || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+networks:
+  financial-network:
+    driver: bridge
+
+volumes:
+  sqldata:

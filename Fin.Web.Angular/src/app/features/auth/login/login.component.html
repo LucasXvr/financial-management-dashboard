@@ -1,0 +1,51 @@
+<section class="auth-page">
+  <form class="auth-card" [formGroup]="loginForm" (ngSubmit)="submit()">
+    <h1>Entrar no Sistema</h1>
+    <p>Entre para acessar sua area financeira.</p>
+
+    <label for="email">Email</label>
+    <input
+      id="email"
+      type="email"
+      formControlName="email"
+      placeholder="voce@empresa.com"
+    />
+
+    <small
+      *ngIf="loginForm.controls.email.touched && loginForm.controls.email.invalid"
+    >
+      Informe um email valido.
+    </small>
+
+    <label for="password">Senha</label>
+    <input
+      id="password"
+      type="password"
+      formControlName="password"
+      placeholder="********"
+    />
+
+    <small
+      *ngIf="
+        loginForm.controls.password.touched &&
+        loginForm.controls.password.invalid
+      "
+    >
+      Informe sua senha.
+    </small>
+
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <button type="submit" [disabled]="loading">
+      {{ loading ? 'Entrando...' : 'Entrar' }}
+    </button>
+
+    <div class="auth-links">
+      <a routerLink="/">Voltar para pagina inicial</a>
+      <span>
+        Nao tem conta?
+        <a routerLink="/register">Criar conta</a>
+      </span>
+    </div>
+  </form>
+</section>

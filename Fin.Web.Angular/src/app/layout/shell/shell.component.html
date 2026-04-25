@@ -1,0 +1,21 @@
+<div class="shell">
+  <aside>
+    <h2>Financeiro</h2>
+
+    <nav>
+      <a routerLink="/app/dashboard" routerLinkActive="active">Dashboard</a>
+    </nav>
+
+    <button (click)="logout()">Sair</button>
+  </aside>
+
+  <main>
+    <header>
+      <h1>Financial Management Dashboard</h1>
+    </header>
+
+    <section>
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>

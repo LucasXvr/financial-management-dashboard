@@ -98,14 +98,33 @@ namespace Fin.Api.Common.Api
 
         public static void AddCrossOrigin(this WebApplicationBuilder builder)
         {
+            var allowedOrigins = new[]
+            {
+                Configuration.BackendUrl,
+                Configuration.FrontendUrl,
+                "http://localhost:4200",
+                "https://localhost:4200"
+            };
+
             builder.Services.AddCors(
                 options => options.AddPolicy(
                     ApiConfiguration.CorsPolicyName,
                     policy => policy
-                        .WithOrigins([
-                            Configuration.BackendUrl,
-                            Configuration.FrontendUrl
-                        ])
+                        .SetIsOriginAllowed(origin =>
+                        {
+                            if (string.IsNullOrWhiteSpace(origin))
+                                return false;
+
+                            if (allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase))
+                                return true;
+
+                            if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+                                return false;
+
+                            // Allow localhost and loopback ports for Angular/Vite dev servers.
+                            return uri.IsLoopback ||
+                                   string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase);
+                        })
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials()

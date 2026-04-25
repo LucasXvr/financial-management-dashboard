@@ -1,0 +1,35 @@
+h2 {
+  margin: 0;
+  color: #111827;
+}
+
+p {
+  margin-top: 0.5rem;
+  color: #4b5563;
+}
+
+.cards {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1rem;
+}
+
+article {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  display: grid;
+  gap: 0.4rem;
+
+  strong {
+    color: #374151;
+  }
+
+  span {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #111827;
+  }
+}
