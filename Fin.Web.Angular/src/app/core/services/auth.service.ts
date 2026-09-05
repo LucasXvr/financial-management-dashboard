@@ -1,30 +1,16 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, map, switchMap, tap } from 'rxjs';
+import { Observable, catchError, map, switchMap, throwError } from 'rxjs';
 
+import {
+  ApiResponse,
+  LoginRequest,
+  RegisterRequest,
+  extractApiMessage,
+  extractToken
+} from '../models/auth-api.models';
 import { environment } from '../../../environments/environment';
 import { TokenService } from './token.service';
-
-interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-interface RegisterRequest {
-  email: string;
-  password: string;
-}
-
-interface LoginData {
-  token?: string;
-  accessToken?: string;
-}
-
-interface LoginApiResponse {
-  token?: string;
-  accessToken?: string;
-  data?: LoginData;
-}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -37,29 +23,20 @@ export class AuthService {
   ) {}
 
   login(payload: LoginRequest): Observable<void> {
-    return this.http.post<LoginApiResponse>(this.loginUrl, payload).pipe(
-      map((response) => {
-        const token =
-          response.token ??
-          response.accessToken ??
-          response.data?.token ??
-          response.data?.accessToken;
-
-        if (!token) {
-          throw new Error('Token JWT nao encontrado na resposta da API.');
-        }
-
-        return token;
-      }),
-      tap((token) => this.tokenService.setToken(token)),
-      map(() => void 0)
+    return this.http.post<ApiResponse<unknown>>(this.loginUrl, payload).pipe(
+      map((response) => this.persistTokenFromResponse(response)),
+      map(() => void 0),
+      catchError((error) => this.toAuthError(error, 'Nao foi possivel autenticar. Verifique suas credenciais.'))
     );
   }
 
   register(payload: RegisterRequest): Observable<void> {
-    return this.http.post(this.registerUrl, payload).pipe(
-      switchMap(() => this.login(payload))
-    );
+    return this.http
+      .post<ApiResponse<string>>(this.registerUrl, payload)
+      .pipe(
+        switchMap(() => this.login(payload)),
+        catchError((error) => this.toAuthError(error, 'Nao foi possivel criar a conta. Tente novamente.'))
+      );
   }
 
   logout(): void {
@@ -68,5 +45,29 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return this.tokenService.hasToken();
+  }
+
+  private persistTokenFromResponse(response: unknown): string {
+    const token = extractToken(response);
+
+    if (!token) {
+      throw new Error('Token JWT nao encontrado na resposta da API.');
+    }
+
+    this.tokenService.setToken(token);
+    return token;
+  }
+
+  private toAuthError(error: unknown, fallbackMessage: string): Observable<never> {
+    if (error instanceof HttpErrorResponse) {
+      const message = extractApiMessage(error.error, fallbackMessage);
+      return throwError(() => new Error(message));
+    }
+
+    if (error instanceof Error) {
+      return throwError(() => error);
+    }
+
+    return throwError(() => new Error(fallbackMessage));
   }
 }

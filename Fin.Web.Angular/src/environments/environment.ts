@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:5110'
+  // Empty base URL uses Angular dev-server proxy (proxy.conf.json).
+  apiBaseUrl: ''
 };
