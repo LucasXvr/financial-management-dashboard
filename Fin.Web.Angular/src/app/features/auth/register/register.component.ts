@@ -69,9 +69,9 @@ export class RegisterComponent {
             void this.router.navigate(['/app/dashboard']);
           }, 1200);
         },
-        error: () => {
+        error: (error: Error) => {
           this.loading = false;
-          this.errorMessage = 'Nao foi possivel criar a conta. Tente novamente.';
+          this.errorMessage = error.message;
         }
       });
   }

@@ -43,10 +43,9 @@ export class LoginComponent {
         this.loading = false;
         void this.router.navigate(['/app/dashboard']);
       },
-      error: () => {
+      error: (error: Error) => {
         this.loading = false;
-        this.errorMessage =
-          'Nao foi possivel autenticar. Verifique suas credenciais.';
+        this.errorMessage = error.message;
       }
     });
   }
