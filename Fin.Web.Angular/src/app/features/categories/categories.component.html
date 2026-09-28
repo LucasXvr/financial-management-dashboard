@@ -1,0 +1,146 @@
+<div class="categories-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Organizacao financeira</p>
+      <h2>Categorias</h2>
+      <p>Cadastre categorias para organizar suas transacoes.</p>
+    </div>
+  </header>
+
+  <div class="content-grid">
+    <section class="panel form-panel" aria-labelledby="category-form-title">
+      <div class="form-header">
+        <h3 id="category-form-title">
+          {{ editingCategory ? 'Editar categoria' : 'Nova categoria' }}
+        </h3>
+        <button
+          class="text-button"
+          type="button"
+          (click)="cancelEditing()"
+          *ngIf="editingCategory"
+        >
+          Cancelar edicao
+        </button>
+      </div>
+
+      <form [formGroup]="categoryForm" (ngSubmit)="submit()">
+        <label for="category-title">Titulo</label>
+        <input
+          id="category-title"
+          type="text"
+          formControlName="title"
+          maxlength="80"
+          placeholder="Ex.: Alimentacao"
+        />
+        <small
+          class="field-error"
+          *ngIf="categoryForm.controls.title.touched && categoryForm.controls.title.invalid"
+        >
+          Informe um titulo com ate 80 caracteres.
+        </small>
+
+        <label for="category-description">Descricao</label>
+        <textarea
+          id="category-description"
+          formControlName="description"
+          maxlength="255"
+          rows="4"
+          placeholder="Descreva quando usar esta categoria"
+        ></textarea>
+        <small
+          class="field-error"
+          *ngIf="categoryForm.controls.description.touched && categoryForm.controls.description.invalid"
+        >
+          Informe uma descricao com ate 255 caracteres.
+        </small>
+
+        <p class="message error" role="alert" *ngIf="formError">{{ formError }}</p>
+        <p class="message success" role="status" *ngIf="successMessage">
+          {{ successMessage }}
+        </p>
+
+        <button type="submit" [disabled]="saving">
+          {{ saving ? 'Salvando...' : editingCategory ? 'Salvar alteracoes' : 'Cadastrar categoria' }}
+        </button>
+      </form>
+    </section>
+
+    <section class="panel list-panel" aria-labelledby="category-list-title">
+      <div class="list-header">
+        <div>
+          <h3 id="category-list-title">Categorias cadastradas</h3>
+          <p *ngIf="!loading && !loadError">
+            {{ totalCount }} {{ totalCount === 1 ? 'categoria' : 'categorias' }}
+          </p>
+        </div>
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="loadCategories()"
+          [disabled]="loading"
+          *ngIf="loadError"
+        >
+          Tentar novamente
+        </button>
+      </div>
+
+      <p class="state" *ngIf="loading">Carregando categorias...</p>
+      <p class="message error" role="alert" *ngIf="!loading && loadError">
+        {{ loadError }}
+      </p>
+      <p class="state" *ngIf="!loading && !loadError && categories.length === 0">
+        Nenhuma categoria cadastrada. Use o formulario para criar a primeira.
+      </p>
+
+      <ul *ngIf="!loading && !loadError && categories.length > 0">
+        <li *ngFor="let category of categories">
+          <div class="category-marker" aria-hidden="true"></div>
+          <div class="category-content">
+            <strong>{{ category.title }}</strong>
+            <p>{{ category.description }}</p>
+          </div>
+          <div class="category-actions">
+            <button type="button" (click)="startEditing(category)">Editar</button>
+            <button class="danger-button" type="button" (click)="requestDeletion(category)">
+              Excluir
+            </button>
+          </div>
+        </li>
+      </ul>
+
+      <nav
+        class="pagination"
+        aria-label="Paginacao de categorias"
+        *ngIf="!loading && !loadError && totalPages > 1"
+      >
+        <button type="button" (click)="previousPage()" [disabled]="currentPage === 1">
+          Anterior
+        </button>
+        <span>Pagina {{ currentPage }} de {{ totalPages }}</span>
+        <button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          Proxima
+        </button>
+      </nav>
+    </section>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="categoryPendingDeletion">
+  <section class="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+    <h3 id="delete-title">Excluir categoria?</h3>
+    <p>
+      Confirme a exclusao de <strong>{{ categoryPendingDeletion.title }}</strong>.
+      Esta acao e permanente.
+    </p>
+    <p class="warning">
+      Categorias com transações vinculadas não podem ser excluídas. Os lançamentos serão preservados.
+    </p>
+    <p class="message error" role="alert" *ngIf="deleteError">{{ deleteError }}</p>
+    <div class="modal-actions">
+      <button type="button" (click)="cancelDeletion()" [disabled]="deleting">Cancelar</button>
+      <button class="confirm-delete" type="button" (click)="confirmDeletion()" [disabled]="deleting">
+        {{ deleting ? 'Excluindo...' : 'Confirmar exclusao' }}
+      </button>
+    </div>
+  </section>
+</div>

@@ -1,117 +1,227 @@
-# 💸 Financial Management Dashboard
+# Financial Management Dashboard
 
-Sistema de gerenciamento financeiro pessoal, focado em controle de receitas e despesas mensais, com autenticação de usuários e interface intuitiva. Este projeto foi desenvolvido como parte do meu portfólio, combinando backend em .NET com frontend moderno em React, com o objetivo de demonstrar habilidades full stack.
+Aplicação de gerenciamento financeiro pessoal criada como projeto de portfólio full stack com **ASP.NET Core 8**, **Angular**, **React** e **SQL Server**.
 
-## 🚀 Funcionalidades Implementadas
+O frontend original foi construído em React e está sendo migrado gradualmente para Angular. A aplicação Angular já oferece autenticação e gerenciamento de categorias integrados à API.
 
-### Autenticação e Usuários
-- ✅ **Sistema de Autenticação** completo com JWT
-- ✅ **Registro e Login** de usuários
-- ✅ **Recuperação de senha**
-- ✅ **Perfil do usuário** com informações personalizadas
+## Estado atual
 
-### Gestão Financeira
-- ✅ **Dashboard** com visão geral das finanças
-- ✅ **Transações** (receitas e despesas)
-  - Criação, edição e exclusão de transações
-  - Categorização de transações
-  - Filtros por período e categoria
-- ✅ **Categorias** personalizadas
-  - Gerenciamento de categorias de receitas e despesas
-  - Cores personalizadas para melhor visualização
+### API .NET 8
 
-### Relatórios e Análises
-- ✅ **Relatórios financeiros** mensais
-- ✅ **Gráficos** interativos
-  - Distribuição de gastos por categoria
-  - Evolução de receitas e despesas
-- ✅ **Exportação** de relatórios
+- Cadastro e login com JWT.
+- Autorização e isolamento de dados por usuário.
+- CRUD de categorias e transações.
+- Paginação e relatórios financeiros.
+- Swagger/OpenAPI em desenvolvimento.
+- Migrations com Entity Framework Core.
+- Testes de integração com xUnit.
 
-## 📌 Tecnologias Utilizadas
+### Frontend Angular
 
-### Backend (.NET Core)
-- **ASP.NET Core Web API** 8.0
-- **Entity Framework Core** para ORM
-- **SQL Server** como banco de dados
-- **JWT** para autenticação
-- **Swagger/OpenAPI** para documentação
-- **Docker** para containerização
+- Página inicial, cadastro e login.
+- Persistência da sessão, guards e interceptor JWT.
+- Layout autenticado e logout.
+- Listagem paginada, cadastro, edição e exclusão de categorias.
+- Estados de carregamento, lista vazia, validação e erro.
+- Atualização da interface em modo sem Zone.js.
+- Mensagem de erro ao tentar excluir uma categoria vinculada a transações.
 
-### Frontend (React)
-- **React** 18+ com Vite
-- **TypeScript** para tipagem estática
-- **TailwindCSS** para estilização
-- **React Router** para navegação
-- **Axios** para requisições HTTP
-- **React Query** para gerenciamento de estado e cache
-- **Chart.js** para gráficos
-- **React Hook Form** para formulários
-- **Zod** para validação
+### Migração pendente
 
-### Ferramentas de Desenvolvimento
-- **Git** para controle de versão
-- **Docker** para containerização
-- **Postman** para testes de API
-- **ESLint** e **Prettier** para padronização de código
+- Gerenciamento de transações no Angular.
+- Dashboard com dados reais.
+- Gráficos e relatórios financeiros.
+- Demais recursos ainda presentes apenas no frontend React.
 
-## 🎯 Próximos Passos
+## Regras de segurança e integridade
 
-- [ ] Implementar testes automatizados (unitários e integração)
-- [ ] Adicionar CI/CD com GitHub Actions
-- [ ] Implementar sistema de notificações
-- [ ] Adicionar suporte a múltiplas moedas
-- [ ] Implementar backup automático dos dados
-- [ ] Adicionar modo offline com PWA
-- [ ] Melhorar acessibilidade (WCAG)
+- As rotas financeiras exigem autenticação.
+- Categorias e transações são filtradas pelo usuário autenticado.
+- Uma transação só aceita uma categoria pertencente ao mesmo usuário.
+- Categorias com transações vinculadas não podem ser excluídas.
+- A chave estrangeira usa `Restrict`, preservando os lançamentos existentes.
 
-## 🧠 Aprendizados
-
-Durante o desenvolvimento deste projeto, aprofundei meus conhecimentos em:
-- Arquitetura de software moderna com separação clara de responsabilidades
-- Desenvolvimento de APIs RESTful com .NET Core
-- Autenticação e autorização com JWT
-- Desenvolvimento frontend moderno com React e TypeScript
-- Gerenciamento de estado e cache no frontend
-- Containerização com Docker
-- Boas práticas de segurança em aplicações web
-- Desenvolvimento de interfaces responsivas e acessíveis
-
-## 📂 Como rodar o projeto
-
-### Pré-requisitos
-- .NET 8.0 SDK
-- Node.js 18+
-- Docker e Docker Compose
-- SQL Server (ou usar o container Docker)
+## Tecnologias
 
 ### Backend
-```bash
-cd Fin.Api
-dotnet restore
-dotnet ef database update
-dotnet run
+
+- .NET 8 e ASP.NET Core Minimal APIs
+- Entity Framework Core 8
+- ASP.NET Core Identity
+- JWT Bearer Authentication
+- SQL Server 2022
+- Swagger/OpenAPI
+- xUnit
+
+### Frontend Angular
+
+- Angular 21 e TypeScript
+- Angular Router e Reactive Forms
+- HttpClient e interceptors funcionais
+- Vitest
+
+### Frontend React
+
+- React, TypeScript e Vite
+- Tailwind CSS
+- React Router, Axios e React Query
+- Chart.js
+
+### Infraestrutura
+
+- Docker e Docker Compose
+- SQL Server em contêiner
+
+## Estrutura
+
+```text
+FinancialManagementDashboard/
+├── Fin.Api/             # API, handlers, endpoints e migrations
+├── Fin.Api.Tests/       # Testes de integração da API
+├── Fin.Core/            # Modelos, contratos, enums e interfaces
+├── Fin.Web.Angular/     # Frontend em migração ativa
+├── Fin.Web.React/       # Frontend React original
+├── docker-compose.yml
+└── FinancialManagementDashboard.sln
 ```
 
-### Frontend
+## Pré-requisitos
+
+- Docker Desktop com Docker Compose.
+- Node.js 20.19 ou superior e npm para o Angular.
+- SDK .NET 8 apenas para executar a API ou os testes fora do Docker.
+
+## Configuração segura
+
+Não publique senhas, connection strings ou segredos JWT reais. Use variáveis de ambiente ou arquivos locais ignorados pelo Git.
+
+Configurações principais da API:
+
+```text
+ConnectionStrings__DefaultConnection
+JwtSettings__SecretKey
+FrontendUrl
+BackendUrl
+```
+
+## API e banco com Docker
+
+Na raiz do repositório:
+
 ```bash
-cd Fin.Web.React
+docker compose up -d --build
+docker compose ps
+```
+
+Serviços padrão:
+
+- API: `http://localhost:5110`
+- Swagger: `http://localhost:5110/swagger`
+- SQL Server: `localhost:1200`
+
+As migrations são aplicadas durante a inicialização da API. O healthcheck impede que ela inicie antes de o SQL Server aceitar conexões.
+
+Para encerrar os serviços:
+
+```bash
+docker compose down
+```
+
+O volume do SQL Server é preservado. O comando `docker compose down -v` também remove os dados locais.
+
+## Frontend Angular
+
+Com a API disponível em `http://localhost:5110`:
+
+```bash
+cd Fin.Web.Angular
 npm install
-npm run dev
+npm start
 ```
 
-### Usando Docker
+A aplicação ficará disponível em `http://localhost:4200`.
+
+O servidor de desenvolvimento usa [proxy.conf.json](Fin.Web.Angular/proxy.conf.json) para encaminhar as chamadas da API.
+
+## API sem Docker
+
+Com o SDK .NET 8 e uma instância do SQL Server disponível:
+
 ```bash
-docker-compose up -d
+dotnet restore
+dotnet ef database update --project Fin.Api --startup-project Fin.Api
+dotnet run --project Fin.Api
 ```
 
-## 📝 Documentação da API
+Configure os valores locais por variáveis de ambiente ou em `Fin.Api/appsettings.Development.json`. Esse arquivo é ignorado pelo Git.
 
-A documentação completa da API está disponível através do Swagger quando o backend estiver rodando:
+## Testes
+
+### API
+
+```bash
+dotnet test FinancialManagementDashboard.sln
 ```
-http://localhost:5000/swagger
+
+Alternativa com SDK .NET 8 em Docker:
+
+```bash
+docker run --rm -v "${PWD}:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0 \
+  dotnet test FinancialManagementDashboard.sln --configuration Release
 ```
 
-## 👤 Autor
+Os testes atuais verificam o isolamento de categorias entre dois usuários e a preservação dos lançamentos quando uma exclusão inválida é solicitada.
 
-Desenvolvido por **Lucas Xavier**
-[LinkedIn](https://www.linkedin.com/in/lucas-xavier-89a44120b/) | [GitHub](https://github.com/LucasXvr)
+### Angular
+
+```bash
+cd Fin.Web.Angular
+npm test -- --watch=false
+npm run build
+```
+
+## Endpoints principais
+
+### Identidade
+
+```text
+POST /v1/identity/register
+POST /v1/identity/login
+```
+
+### Categorias
+
+```text
+GET    /v1/categories
+GET    /v1/categories/{id}
+POST   /v1/categories
+PUT    /v1/categories/{id}
+DELETE /v1/categories/{id}
+```
+
+### Transações
+
+```text
+GET    /v1/transactions
+GET    /v1/transactions/{id}
+POST   /v1/transactions
+PUT    /v1/transactions/{id}
+DELETE /v1/transactions/{id}
+```
+
+Consulte o Swagger para os contratos completos e os endpoints de relatórios.
+
+## Próximos passos
+
+- Implementar o gerenciamento de transações no Angular.
+- Migrar dashboard, gráficos e relatórios.
+- Adicionar testes HTTP e testes de jornada do usuário.
+- Criar pipeline de CI para build e testes.
+- Substituir as credenciais de desenvolvimento versionadas por exemplos seguros.
+
+## Autor
+
+Desenvolvido por **Lucas Xavier**.
+
+- [LinkedIn](https://www.linkedin.com/in/lucas-xavier-89a44120b/)
+- [GitHub](https://github.com/LucasXvr)

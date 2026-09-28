@@ -46,6 +46,16 @@ namespace Fin.Api.Handlers
                 if (category is null)
                     return new Response<Category?>(null, 404, "Categoria não encontrada");
 
+                var hasTransactions = await context.Transactions
+                    .AsNoTracking()
+                    .AnyAsync(x => x.CategoryId == category.Id);
+
+                if (hasTransactions)
+                    return new Response<Category?>(
+                        null,
+                        409,
+                        "Não é possível excluir uma categoria com transações vinculadas");
+
                 context.Categories.Remove(category);
                 await context.SaveChangesAsync();
 

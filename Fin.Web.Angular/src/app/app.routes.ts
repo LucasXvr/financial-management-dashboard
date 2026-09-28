@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { authGuard, guestGuard } from './core/guards';
 import { LandingComponent } from './features/public/landing/landing.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { CategoriesComponent } from './features/categories/categories.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ShellComponent } from './layout/shell/shell.component';
@@ -28,9 +29,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: DashboardComponent }
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'categories', component: CategoriesComponent }
     ]
   },
   { path: 'dashboard', redirectTo: 'app/dashboard', pathMatch: 'full' },
+  { path: 'categories', redirectTo: 'app/categories', pathMatch: 'full' },
   { path: '**', redirectTo: '' }
 ];

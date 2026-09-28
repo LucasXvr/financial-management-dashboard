@@ -24,6 +24,16 @@ namespace Fin.Api.Handlers
 
             try
             {
+                var categoryExists = await context.Categories
+                    .AsNoTracking()
+                    .AnyAsync(x => x.Id == request.CategoryId && x.UserId == request.UserId);
+
+                if (!categoryExists)
+                    return new Response<Transaction?>(
+                        null,
+                        400,
+                        "Categoria não encontrada para o usuário autenticado");
+
                 var transaction = new Transaction
                 {
                     UserId = request.UserId,
@@ -145,6 +155,16 @@ namespace Fin.Api.Handlers
 
                 if (transaction is null)
                     return new Response<Transaction?>(null, 404, "Transação não encontrada");
+
+                var categoryExists = await context.Categories
+                    .AsNoTracking()
+                    .AnyAsync(x => x.Id == request.CategoryId && x.UserId == request.UserId);
+
+                if (!categoryExists)
+                    return new Response<Transaction?>(
+                        null,
+                        400,
+                        "Categoria não encontrada para o usuário autenticado");
 
                 transaction.CategoryId = request.CategoryId;
                 transaction.Amount = request.Amount;
