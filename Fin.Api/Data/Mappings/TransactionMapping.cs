@@ -38,6 +38,11 @@ namespace Fin.Api.Data.Mappings
             builder.Property(x => x.IsSavings)
                 .IsRequired(true)
                 .HasDefaultValue(false);
+
+            builder.HasOne(x => x.Category)
+                .WithMany()
+                .HasForeignKey(x => x.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
