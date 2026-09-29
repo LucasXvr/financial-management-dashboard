@@ -109,9 +109,14 @@ BackendUrl
 Na raiz do repositório:
 
 ```bash
+cp .env.example .env
+# Edite .env e defina senhas locais fortes antes de iniciar os contêineres.
 docker compose up -d --build
 docker compose ps
 ```
+
+O arquivo `.env` é local e ignorado pelo Git. O Compose interrompe a inicialização
+se `SQL_SERVER_PASSWORD` ou `JWT_SECRET` não estiverem definidos.
 
 Serviços padrão:
 

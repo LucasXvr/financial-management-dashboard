@@ -3,6 +3,23 @@ h2 {
   color: #111827;
 }
 
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  button {
+    border: 1px solid #047857;
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    background: #fff;
+    color: #047857;
+    cursor: pointer;
+    font-weight: 600;
+  }
+}
+
 p {
   margin-top: 0.5rem;
   color: #4b5563;
@@ -27,9 +44,171 @@ article {
     color: #374151;
   }
 
+  small {
+    color: #6b7280;
+    font-size: 0.78rem;
+  }
+
   span {
     font-size: 1.2rem;
     font-weight: 700;
     color: #111827;
   }
+
+  .income {
+    color: #047857;
+  }
+
+  .expense,
+  .negative {
+    color: #b91c1c;
+  }
+}
+
+.state {
+  margin-top: 1rem;
+  border-radius: 9px;
+  padding: 0.75rem;
+  background: #f9fafb;
+  color: #6b7280;
+}
+
+.error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.empty {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.chart-panel {
+  margin-top: 1.25rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #fff;
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  p {
+    margin-top: 0.25rem;
+    color: #6b7280;
+    font-size: 0.85rem;
+  }
+
+  button {
+    border: 1px solid #047857;
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    background: #fff;
+    color: #047857;
+    cursor: pointer;
+    font-weight: 600;
+  }
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin: 1rem 0;
+  color: #4b5563;
+  font-size: 0.8rem;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  i {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  .income-key {
+    background: #10b981;
+  }
+
+  .expense-key {
+    background: #ef4444;
+  }
+}
+
+.chart-plot {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(70px, 1fr));
+  gap: 0.75rem;
+  overflow-x: auto;
+}
+
+.month-group {
+  display: grid;
+  min-width: 70px;
+  text-align: center;
+
+  > strong {
+    margin-top: 0.55rem;
+    color: #374151;
+    font-size: 0.85rem;
+    text-transform: capitalize;
+  }
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.3rem;
+  height: 180px;
+  border-bottom: 1px solid #d1d5db;
+  background: repeating-linear-gradient(
+    to top,
+    #f3f4f6 0,
+    #f3f4f6 1px,
+    transparent 1px,
+    transparent 45px
+  );
+}
+
+.bar {
+  width: min(24px, 34%);
+  border-radius: 5px 5px 0 0;
+  transition: height 180ms ease;
+}
+
+.income-bar {
+  background: #10b981;
+}
+
+.expense-bar {
+  background: #ef4444;
+}
+
+.month-value {
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.income-text {
+  color: #047857;
+}
+
+.expense-text {
+  color: #b91c1c;
 }

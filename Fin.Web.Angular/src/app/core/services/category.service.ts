@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { EMPTY, Observable, expand, map, reduce } from 'rxjs';
 
 import {
   Category,
@@ -27,6 +27,23 @@ export class CategoryService {
         pageSize
       }
     });
+  }
+
+  getAllCategories(pageSize = 100): Observable<Category[]> {
+    return this.getCategories(1, pageSize).pipe(
+      expand((response) =>
+        response.currentPage < response.totalPages
+          ? this.getCategories(response.currentPage + 1, pageSize)
+          : EMPTY
+      ),
+      reduce(
+        (categories, response) => [...categories, ...(response.data ?? [])],
+        [] as Category[]
+      ),
+      map((categories) =>
+        categories.sort((left, right) => left.title.localeCompare(right.title, 'pt-BR'))
+      )
+    );
   }
 
   createCategory(payload: CreateCategoryRequest): Observable<Category> {

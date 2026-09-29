@@ -24,7 +24,6 @@ namespace Fin.Api.Endpoints
 
             endpoints.MapGroup("v1/identity")
                 .WithTags("Identity")
-                .AllowAnonymous() // já está definido nos próprios endpoints
                 .MapEndpoint<LoginEndpoint>()
                 .MapEndpoint<RegisterEndpoint>();
 

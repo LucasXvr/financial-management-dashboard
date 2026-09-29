@@ -185,22 +185,11 @@ namespace Fin.Api.Handlers
     
         public async Task<decimal> GetCurrentBalance(string userId)
         {
-            var transactions = await context.Transactions
-                .Where(t => t.UserId == userId)
-                .ToListAsync();
-            
-            var deposits = transactions
-                .Where(t => t.Type == ETransactionType.Deposit)
-                .ToList();
-
-            var withdraws = transactions
-                .Where(t => t.Type == ETransactionType.Withdraw)
-                .ToList();
-
-            var depositsSum = deposits.Sum(t => t.Amount);
-            var withdrawsSum = withdraws.Sum(t => t.Amount);
-
-            return depositsSum - Math.Abs(withdrawsSum);         
+            return await context.Transactions
+                .Where(t => t.UserId == userId &&
+                            (t.Type == ETransactionType.Deposit ||
+                             t.Type == ETransactionType.Withdraw))
+                .SumAsync(t => t.Amount);
         }
 
         public async Task<decimal> GetTotalIncomeByPeriod(string userId, DateTime start, DateTime end)
@@ -215,12 +204,14 @@ namespace Fin.Api.Handlers
 
         public async Task<decimal> GetTotalExpensesByPeriod(string userId, DateTime start, DateTime end)
         {
-            return await context.Transactions
+            var total = await context.Transactions
                 .Where(t => t.UserId == userId &&
                            t.Type == ETransactionType.Withdraw && 
                            t.PaidOrReceivedAt >= start && 
                            t.PaidOrReceivedAt <= end)
                 .SumAsync(t => t.Amount);
+
+            return Math.Abs(total);
         }
 
         public async Task<decimal> GetSavingsByPeriod(string userId, DateTime start, DateTime end)
@@ -242,22 +233,22 @@ namespace Fin.Api.Handlers
             {
                 var date = currentDate.AddMonths(-i);
                 var startOfMonth = new DateTime(date.Year, date.Month, 1);
-                var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+                var nextMonth = startOfMonth.AddMonths(1);
 
                 // Calculamos o saldo acumulado até o final deste mês
                 var totalIncome = await context.Transactions
                     .Where(t => t.UserId == userId &&
                                t.Type == ETransactionType.Deposit && 
-                               t.PaidOrReceivedAt <= endOfMonth)
+                               t.PaidOrReceivedAt < nextMonth)
                     .SumAsync(t => t.Amount);
 
                 var totalExpenses = await context.Transactions
                     .Where(t => t.UserId == userId &&
                                t.Type == ETransactionType.Withdraw && 
-                               t.PaidOrReceivedAt <= endOfMonth)
+                               t.PaidOrReceivedAt < nextMonth)
                     .SumAsync(t => t.Amount);
 
-                var balance = totalIncome - totalExpenses;
+                var balance = totalIncome + totalExpenses;
 
                 result.Add(new BalanceOverTimeDTO
                 {
@@ -280,7 +271,7 @@ namespace Fin.Api.Handlers
                 .Select(g => new ExpensesByCategoryDTO
                 {
                     Category = g.Key,
-                    Amount = g.Sum(t => t.Amount)
+                    Amount = -g.Sum(t => t.Amount)
                 })
                 .OrderByDescending(x => x.Amount)
                 .Take(5) // Pegar as 5 maiores categorias
@@ -296,27 +287,27 @@ namespace Fin.Api.Handlers
             {
                 var date = currentDate.AddMonths(-i);
                 var startOfMonth = new DateTime(date.Year, date.Month, 1);
-                var endOfMonth = startOfMonth.AddMonths(1).AddDays(-1);
+                var nextMonth = startOfMonth.AddMonths(1);
 
                 var income = await context.Transactions
                     .Where(t => t.UserId == userId &&
                                t.Type == ETransactionType.Deposit && 
                                t.PaidOrReceivedAt >= startOfMonth && 
-                               t.PaidOrReceivedAt <= endOfMonth)
+                               t.PaidOrReceivedAt < nextMonth)
                     .SumAsync(t => t.Amount);
 
                 var expenses = await context.Transactions
                     .Where(t => t.UserId == userId &&
                                t.Type == ETransactionType.Withdraw && 
                                t.PaidOrReceivedAt >= startOfMonth && 
-                               t.PaidOrReceivedAt <= endOfMonth)
+                               t.PaidOrReceivedAt < nextMonth)
                     .SumAsync(t => t.Amount);
 
                 result.Add(new TransactionsByMonthDTO
                 {
                     Month = date.ToString("MMM", new System.Globalization.CultureInfo("pt-BR")),
                     Income = income,
-                    Expenses = expenses
+                    Expenses = Math.Abs(expenses)
                 });
             }
 

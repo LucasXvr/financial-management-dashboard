@@ -10,8 +10,8 @@ namespace Fin.Api.Endpoints.FinancialReports
         public static void Map(IEndpointRouteBuilder app)
         => app.MapGet("/current-balance", HandleAsync)
             .WithName("FinancialReports: GetCurrentBalance")
-            .WithSummary("Obtém o saldo atual")
-            .WithDescription("Retorna o saldo atual do usuário")
+            .WithSummary("Obtém o saldo acumulado")
+            .WithDescription("Retorna o saldo acumulado do usuário considerando todo o histórico")
             .WithOrder(1)
             .Produces<decimal>();
 

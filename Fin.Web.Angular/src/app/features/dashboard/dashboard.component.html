@@ -1,9 +1,90 @@
-<h2>Visao geral</h2>
-<p>Base Angular pronta para evoluir os modulos financeiros.</p>
-
-<div class="cards">
-  <article *ngFor="let card of cards">
-    <strong>{{ card.title }}</strong>
-    <span>{{ card.value }}</span>
-  </article>
+<div class="dashboard-header">
+  <div>
+    <h2>Visão geral</h2>
+    <p>Receitas e despesas do mês atual, com saldo acumulado de todo o histórico.</p>
+  </div>
+  <button type="button" (click)="loadSummary()" [disabled]="loading" *ngIf="errorMessage">
+    Tentar novamente
+  </button>
 </div>
+
+<p class="state" *ngIf="loading">Carregando dados financeiros...</p>
+<p class="state error" role="alert" *ngIf="!loading && errorMessage">
+  {{ errorMessage }}
+</p>
+
+<ng-container *ngIf="!loading && !errorMessage && summary as data">
+  <p class="state empty" *ngIf="data.transactionCount === 0">
+    Nenhuma transação registrada no mês atual. O saldo acumulado continua considerando todo o histórico.
+  </p>
+
+  <div class="cards">
+    <article>
+      <strong>Receitas</strong>
+      <small>Mês atual</small>
+      <span class="income">{{ formatCurrency(data.income) }}</span>
+    </article>
+    <article>
+      <strong>Despesas</strong>
+      <small>Mês atual</small>
+      <span class="expense">{{ formatCurrency(data.expenses) }}</span>
+    </article>
+    <article>
+      <strong>Saldo acumulado</strong>
+      <small>Todo o histórico</small>
+      <span [class.negative]="data.balance < 0">{{ formatCurrency(data.balance) }}</span>
+    </article>
+  </div>
+</ng-container>
+
+<section class="chart-panel" aria-labelledby="monthly-chart-title">
+  <div class="chart-header">
+    <div>
+      <h3 id="monthly-chart-title">Receitas e despesas</h3>
+      <p>Últimos 6 meses</p>
+    </div>
+    <button type="button" (click)="loadMonthlyReport()" [disabled]="chartLoading" *ngIf="chartError">
+      Tentar novamente
+    </button>
+  </div>
+
+  <p class="state" *ngIf="chartLoading">Carregando histórico mensal...</p>
+  <p class="state error" role="alert" *ngIf="!chartLoading && chartError">
+    {{ chartError }}
+  </p>
+  <p class="state empty" *ngIf="!chartLoading && !chartError && chartIsEmpty">
+    Nenhuma receita ou despesa registrada nos últimos 6 meses.
+  </p>
+
+  <div
+    class="monthly-chart"
+    role="img"
+    aria-label="Comparação de receitas e despesas dos últimos 6 meses"
+    *ngIf="!chartLoading && !chartError && !chartIsEmpty"
+  >
+    <div class="chart-legend" aria-hidden="true">
+      <span><i class="income-key"></i>Receitas</span>
+      <span><i class="expense-key"></i>Despesas</span>
+    </div>
+
+    <div class="chart-plot">
+      <div class="month-group" *ngFor="let item of monthlyData">
+        <div class="bars" aria-hidden="true">
+          <span
+            class="bar income-bar"
+            [style.height.%]="barHeight(item.income)"
+            [title]="'Receitas: ' + formatCurrency(item.income)"
+          ></span>
+          <span
+            class="bar expense-bar"
+            [style.height.%]="barHeight(item.expenses)"
+            [title]="'Despesas: ' + formatCurrency(item.expenses)"
+          ></span>
+        </div>
+        <strong>{{ item.month }}</strong>
+        <span class="month-value income-text">{{ formatCurrency(item.income) }}</span>
+        <span class="month-value expense-text">{{ formatCurrency(item.expenses) }}</span>
+      </div>
+    </div>
+  </div>
+</section>

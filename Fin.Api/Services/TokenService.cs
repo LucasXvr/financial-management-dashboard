@@ -38,7 +38,7 @@ namespace Fin.Api.Services
             if (string.IsNullOrEmpty(_jwtSettings.SecretKey))
                 throw new InvalidOperationException("JwtSettings.SecretKey não pode ser nulo ou vazio");
 
-            var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
+            var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -69,7 +69,7 @@ namespace Fin.Api.Services
         public ClaimsPrincipal ValidateToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
+            var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
 
             var validationParameters = new TokenValidationParameters
             {
