@@ -1,0 +1,219 @@
+<div class="transactions-page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Movimentação financeira</p>
+      <h2>Transações</h2>
+      <p>Registre receitas, despesas e valores reservados.</p>
+    </div>
+  </header>
+
+  <div class="content-grid">
+    <section class="panel form-panel" aria-labelledby="transaction-form-title">
+      <div class="form-header">
+        <h3 id="transaction-form-title">
+          {{ editingTransaction ? 'Editar transação' : 'Nova transação' }}
+        </h3>
+        <button
+          class="text-button"
+          type="button"
+          (click)="cancelEditing()"
+          *ngIf="editingTransaction"
+        >
+          Cancelar edição
+        </button>
+      </div>
+
+      <p class="state" *ngIf="categoriesLoading">Carregando categorias...</p>
+      <div *ngIf="!categoriesLoading && categoriesError">
+        <p class="message error" role="alert">{{ categoriesError }}</p>
+        <button class="secondary-button" type="button" (click)="loadCategories()">
+          Tentar novamente
+        </button>
+      </div>
+      <p
+        class="message warning"
+        *ngIf="!categoriesLoading && !categoriesError && categories.length === 0"
+      >
+        Cadastre uma categoria antes de registrar uma transação.
+      </p>
+
+      <form [formGroup]="transactionForm" (ngSubmit)="submit()">
+        <label for="transaction-title">Título</label>
+        <input
+          id="transaction-title"
+          type="text"
+          formControlName="title"
+          maxlength="80"
+          placeholder="Ex.: Supermercado"
+        />
+        <small
+          class="field-error"
+          *ngIf="transactionForm.controls.title.touched && transactionForm.controls.title.invalid"
+        >
+          Informe um título com até 80 caracteres.
+        </small>
+
+        <div class="form-row">
+          <div>
+            <label for="transaction-type">Tipo</label>
+            <select id="transaction-type" formControlName="type">
+              <option *ngFor="let item of transactionTypes" [ngValue]="item.value">
+                {{ item.label }}
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label for="transaction-amount">Valor</label>
+            <input
+              id="transaction-amount"
+              type="text"
+              inputmode="decimal"
+              formControlName="amount"
+              placeholder="0,00"
+              (blur)="formatAmount()"
+            />
+            <small
+              class="field-error"
+              *ngIf="transactionForm.controls.amount.touched && transactionForm.controls.amount.invalid"
+            >
+              Informe um valor maior que zero, com até dois centavos.
+            </small>
+          </div>
+        </div>
+
+        <label for="transaction-category">Categoria</label>
+        <select id="transaction-category" formControlName="categoryId">
+          <option [ngValue]="0">Selecione uma categoria</option>
+          <option *ngFor="let category of categories" [ngValue]="category.id">
+            {{ category.title }}
+          </option>
+        </select>
+        <small
+          class="field-error"
+          *ngIf="transactionForm.controls.categoryId.touched && transactionForm.controls.categoryId.invalid"
+        >
+          Selecione uma categoria.
+        </small>
+
+        <label for="transaction-date">Data</label>
+        <input id="transaction-date" type="date" formControlName="paidOrReceivedAt" />
+        <small
+          class="field-error"
+          *ngIf="transactionForm.controls.paidOrReceivedAt.touched && transactionForm.controls.paidOrReceivedAt.invalid"
+        >
+          Informe a data da transação.
+        </small>
+
+        <p class="message error" role="alert" *ngIf="formError">{{ formError }}</p>
+        <p class="message success" role="status" *ngIf="successMessage">
+          {{ successMessage }}
+        </p>
+
+        <button
+          type="submit"
+          [disabled]="saving || categoriesLoading || !!categoriesError || categories.length === 0"
+        >
+          {{ saving ? 'Salvando...' : editingTransaction ? 'Salvar alterações' : 'Cadastrar transação' }}
+        </button>
+      </form>
+    </section>
+
+    <section class="panel list-panel" aria-labelledby="transaction-list-title">
+      <div class="list-header">
+        <div>
+          <h3 id="transaction-list-title">Transações cadastradas</h3>
+          <p *ngIf="!loading && !loadError">
+            {{ totalCount }} {{ totalCount === 1 ? 'transação' : 'transações' }}
+          </p>
+        </div>
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="loadTransactions()"
+          [disabled]="loading"
+          *ngIf="loadError"
+        >
+          Tentar novamente
+        </button>
+      </div>
+
+      <p class="state" *ngIf="loading">Carregando transações...</p>
+      <p class="message error" role="alert" *ngIf="!loading && loadError">
+        {{ loadError }}
+      </p>
+      <p class="state" *ngIf="!loading && !loadError && transactions.length === 0">
+        Nenhuma transação cadastrada. Use o formulário para criar a primeira.
+      </p>
+
+      <ul *ngIf="!loading && !loadError && transactions.length > 0">
+        <li *ngFor="let transaction of transactions">
+          <span
+            class="transaction-marker"
+            [class.withdraw]="transaction.type === 2"
+            [class.saving]="transaction.type === 3"
+            aria-hidden="true"
+          ></span>
+          <div class="transaction-content">
+            <div class="transaction-heading">
+              <strong>{{ transaction.title }}</strong>
+              <span
+                class="amount"
+                [class.negative]="transaction.amount < 0"
+                [class.saving-amount]="transaction.type === 3"
+              >
+                {{ formatCurrency(transaction.amount) }}
+              </span>
+            </div>
+            <p>
+              {{ categoryTitle(transaction.categoryId) }} ·
+              {{ typeLabel(transaction.type) }} ·
+              {{ formatDate(transaction.paidOrReceivedAt) }}
+            </p>
+            <div class="transaction-actions">
+              <button type="button" (click)="startEditing(transaction)">Editar</button>
+              <button
+                class="danger-button"
+                type="button"
+                (click)="requestDeletion(transaction)"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <nav
+        class="pagination"
+        aria-label="Paginação de transações"
+        *ngIf="!loading && !loadError && totalPages > 1"
+      >
+        <button type="button" (click)="previousPage()" [disabled]="currentPage === 1">
+          Anterior
+        </button>
+        <span>Página {{ currentPage }} de {{ totalPages }}</span>
+        <button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          Próxima
+        </button>
+      </nav>
+    </section>
+  </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="transactionPendingDeletion">
+  <section class="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+    <h3 id="delete-title">Excluir transação?</h3>
+    <p>
+      Confirme a exclusão de <strong>{{ transactionPendingDeletion.title }}</strong>.
+      Esta ação é permanente.
+    </p>
+    <p class="message error" role="alert" *ngIf="deleteError">{{ deleteError }}</p>
+    <div class="modal-actions">
+      <button type="button" (click)="cancelDeletion()" [disabled]="deleting">Cancelar</button>
+      <button class="confirm-delete" type="button" (click)="confirmDeletion()" [disabled]="deleting">
+        {{ deleting ? 'Excluindo...' : 'Confirmar exclusão' }}
+      </button>
+    </div>
+  </section>
+</div>

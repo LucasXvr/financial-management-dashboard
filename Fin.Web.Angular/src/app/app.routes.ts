@@ -4,6 +4,7 @@ import { authGuard, guestGuard } from './core/guards';
 import { LandingComponent } from './features/public/landing/landing.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { CategoriesComponent } from './features/categories/categories.component';
+import { TransactionsComponent } from './features/transactions/transactions.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ShellComponent } from './layout/shell/shell.component';
@@ -30,10 +31,12 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
-      { path: 'categories', component: CategoriesComponent }
+      { path: 'categories', component: CategoriesComponent },
+      { path: 'transactions', component: TransactionsComponent }
     ]
   },
   { path: 'dashboard', redirectTo: 'app/dashboard', pathMatch: 'full' },
   { path: 'categories', redirectTo: 'app/categories', pathMatch: 'full' },
+  { path: 'transactions', redirectTo: 'app/transactions', pathMatch: 'full' },
   { path: '**', redirectTo: '' }
 ];

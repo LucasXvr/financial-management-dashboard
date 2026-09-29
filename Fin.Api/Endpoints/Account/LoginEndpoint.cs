@@ -29,15 +29,17 @@ public class LoginEndpoint : IEndpoint
         var user = await userManager.FindByEmailAsync(request.Email);
         if (user == null)
         {
-            return TypedResults.BadRequest(
-                new Response<LoginResponse>(null, 404, "Usuário não encontrado"));
+            return Results.Json(
+                new Response<LoginResponse>(null, 401, "Credenciais inválidas"),
+                statusCode: StatusCodes.Status401Unauthorized);
         }
 
-        var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+        var result = await signInManager.CheckPasswordSignInAsync(user, request.Password, true);
         if (!result.Succeeded)
         {
-            return TypedResults.BadRequest(
-                new Response<LoginResponse>(null, 500, "Credenciais inválidas"));
+            return Results.Json(
+                new Response<LoginResponse>(null, 401, "Credenciais inválidas"),
+                statusCode: StatusCodes.Status401Unauthorized);
         }
 
         var roles = await userManager.GetRolesAsync(user);

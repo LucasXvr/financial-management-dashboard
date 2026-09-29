@@ -2,6 +2,60 @@
   box-sizing: border-box;
 }
 
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(17 24 39 / 65%);
+}
+
+.confirmation-modal {
+  width: min(100%, 480px);
+  border-radius: 14px;
+  padding: 1.5rem;
+  background: #fff;
+
+  h3 {
+    margin: 0;
+    color: #111827;
+  }
+
+  p {
+    color: #4b5563;
+    line-height: 1.5;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+
+  button {
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .confirm-delete {
+    border-color: #b91c1c;
+    background: #b91c1c;
+    color: #fff;
+  }
+
+  button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+  }
+}
+
 html,
 body {
   margin: 0;

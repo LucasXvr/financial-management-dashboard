@@ -11,7 +11,7 @@ namespace Fin.Api.Endpoints.FinancialReports
         => app.MapGet("/savings", HandleAsync)
             .WithName("FinancialReports: GetSavingsByPeriod")
             .WithSummary("Obtém a economia em um período")
-            .WithDescription("Retorna a economia do usuário (receitas - despesas) em um período específico")
+            .WithDescription("Retorna o total reservado pelo usuário em um período específico")
             .WithOrder(4)
             .Produces<decimal>();
 

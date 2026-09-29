@@ -48,14 +48,17 @@ namespace Fin.Api.Common.Api
             if (jwtSettings == null)
                 throw new InvalidOperationException("JwtSettings não encontrado na configuração");
                 
-            if (string.IsNullOrEmpty(jwtSettings.SecretKey))
-                throw new InvalidOperationException("JwtSettings.SecretKey não pode ser nulo ou vazio");
+            if (Encoding.UTF8.GetByteCount(jwtSettings.SecretKey ?? string.Empty) < 32)
+                throw new InvalidOperationException("JwtSettings.SecretKey deve ter pelo menos 32 bytes");
                 
             if (string.IsNullOrEmpty(jwtSettings.Issuer))
                 throw new InvalidOperationException("JwtSettings.Issuer não pode ser nulo ou vazio");
                 
             if (string.IsNullOrEmpty(jwtSettings.Audience))
                 throw new InvalidOperationException("JwtSettings.Audience não pode ser nulo ou vazio");
+
+            if (jwtSettings.ExpiryInMinutes <= 0)
+                throw new InvalidOperationException("JwtSettings.ExpiryInMinutes deve ser maior que zero");
 
             builder.Services
                 .AddAuthentication(options =>
@@ -73,7 +76,8 @@ namespace Fin.Api.Common.Api
                         ValidateIssuerSigningKey = true,
                         ValidIssuer = jwtSettings.Issuer,
                         ValidAudience = jwtSettings.Audience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey!)),
+                        ClockSkew = TimeSpan.Zero
                     };
                 });
 
@@ -98,13 +102,19 @@ namespace Fin.Api.Common.Api
 
         public static void AddCrossOrigin(this WebApplicationBuilder builder)
         {
-            var allowedOrigins = new[]
+            var allowedOrigins = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            if (!string.IsNullOrWhiteSpace(Configuration.BackendUrl))
+                allowedOrigins.Add(Configuration.BackendUrl);
+
+            if (!string.IsNullOrWhiteSpace(Configuration.FrontendUrl))
+                allowedOrigins.Add(Configuration.FrontendUrl);
+
+            if (builder.Environment.IsDevelopment())
             {
-                Configuration.BackendUrl,
-                Configuration.FrontendUrl,
-                "http://localhost:4200",
-                "https://localhost:4200"
-            };
+                allowedOrigins.Add("http://localhost:4200");
+                allowedOrigins.Add("https://localhost:4200");
+            }
 
             builder.Services.AddCors(
                 options => options.AddPolicy(
@@ -115,15 +125,7 @@ namespace Fin.Api.Common.Api
                             if (string.IsNullOrWhiteSpace(origin))
                                 return false;
 
-                            if (allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase))
-                                return true;
-
-                            if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
-                                return false;
-
-                            // Allow localhost and loopback ports for Angular/Vite dev servers.
-                            return uri.IsLoopback ||
-                                   string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase);
+                            return allowedOrigins.Contains(origin);
                         })
                         .AllowAnyMethod()
                         .AllowAnyHeader()
@@ -156,7 +158,10 @@ namespace Fin.Api.Common.Api
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = true;
                 options.Password.RequiredLength = 8;
-                
+                options.Lockout.AllowedForNewUsers = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+
                 options.User.RequireUniqueEmail = true;
             })
             .AddEntityFrameworkStores<AppDbContext>()
