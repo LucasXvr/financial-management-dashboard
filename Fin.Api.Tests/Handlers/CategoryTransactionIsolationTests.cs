@@ -13,13 +13,16 @@ public class CategoryTransactionIsolationTests
 {
     private const string FirstUser = "user-a";
     private const string SecondUser = "user-b";
+    private static readonly DateTime TestDate = new(2026, 9, 29);
+    private static readonly TimeProvider Clock = new FixedTimeProvider(
+        new DateTimeOffset(2026, 9, 29, 15, 0, 0, TimeSpan.Zero));
 
     [Fact]
     public async Task CreateTransaction_RejectsCategoryOwnedByAnotherUser()
     {
         await using var context = CreateContext();
         var firstUserCategory = await AddCategoryAsync(context, FirstUser);
-        var handler = new TransactionHandler(context);
+        var handler = new TransactionHandler(context, Clock);
 
         var response = await handler.CreateAsync(new CreateTransactionRequest
         {
@@ -28,7 +31,7 @@ public class CategoryTransactionIsolationTests
             Title = "Tentativa cruzada",
             Amount = 100,
             Type = ETransactionType.Deposit,
-            PaidOrReceivedAt = DateTime.UtcNow
+            PaidOrReceivedAt = TestDate
         });
 
         Assert.False(response.IsSuccess);
@@ -43,7 +46,7 @@ public class CategoryTransactionIsolationTests
         var firstUserCategory = await AddCategoryAsync(context, FirstUser);
         var secondUserCategory = await AddCategoryAsync(context, SecondUser);
         var transaction = await AddTransactionAsync(context, SecondUser, secondUserCategory.Id);
-        var handler = new TransactionHandler(context);
+        var handler = new TransactionHandler(context, Clock);
 
         var response = await handler.UpdateAsync(new UpdateTransactionRequest
         {
@@ -53,7 +56,7 @@ public class CategoryTransactionIsolationTests
             Title = "Tentativa cruzada",
             Amount = 200,
             Type = ETransactionType.Deposit,
-            PaidOrReceivedAt = DateTime.UtcNow
+            PaidOrReceivedAt = TestDate
         });
 
         Assert.False(response.IsSuccess);
@@ -120,11 +123,16 @@ public class CategoryTransactionIsolationTests
             Title = "Transação de teste",
             Amount = 50,
             Type = ETransactionType.Deposit,
-            PaidOrReceivedAt = DateTime.UtcNow
+            PaidOrReceivedAt = TestDate
         };
 
         context.Transactions.Add(transaction);
         await context.SaveChangesAsync();
         return transaction;
+    }
+
+    private sealed class FixedTimeProvider(DateTimeOffset utcNow) : TimeProvider
+    {
+        public override DateTimeOffset GetUtcNow() => utcNow;
     }
 }

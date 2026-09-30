@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormControl } from '@angular/forms';
 import { of } from 'rxjs';
 
 import { CategoryService } from '../../core/services/category.service';
@@ -70,6 +71,33 @@ describe('TransactionsComponent', () => {
       categoryId: 7,
       paidOrReceivedAt: '2026-09-20T12:00:00'
     });
+  });
+
+  it('accepts past and current dates but rejects a future civil date', () => {
+    const dateControl = getDateControl(fixture.componentInstance);
+
+    dateControl.setValue(dateForInput(-1));
+    expect(dateControl.valid).toBe(true);
+
+    dateControl.setValue(dateForInput(0));
+    expect(dateControl.valid).toBe(true);
+
+    dateControl.setValue(dateForInput(1));
+    dateControl.markAsTouched();
+    fixture.detectChanges();
+
+    expect(dateControl.hasError('futureDate')).toBe(true);
+    expect((fixture.nativeElement as HTMLElement).textContent)
+      .toContain('A data da transação não pode ser futura.');
+  });
+
+  it('keeps the required validation responsible for an empty date', () => {
+    const dateControl = getDateControl(fixture.componentInstance);
+
+    dateControl.setValue('');
+
+    expect(dateControl.hasError('required')).toBe(true);
+    expect(dateControl.hasError('futureDate')).toBe(false);
   });
 
   it('edits a negative expense as a positive amount without inverting it twice', () => {
@@ -165,4 +193,17 @@ class TransactionServiceMock {
     this.lastDeletedId = id;
     return of(void 0);
   }
+}
+
+function dateForInput(dayOffset: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + dayOffset);
+  const timezoneOffset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - timezoneOffset).toISOString().slice(0, 10);
+}
+
+function getDateControl(component: TransactionsComponent): FormControl<string> {
+  return (component as unknown as {
+    transactionForm: { controls: { paidOrReceivedAt: FormControl<string> } };
+  }).transactionForm.controls.paidOrReceivedAt;
 }

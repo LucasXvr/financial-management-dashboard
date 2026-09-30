@@ -100,9 +100,15 @@
         <input id="transaction-date" type="date" formControlName="paidOrReceivedAt" />
         <small
           class="field-error"
-          *ngIf="transactionForm.controls.paidOrReceivedAt.touched && transactionForm.controls.paidOrReceivedAt.invalid"
+          *ngIf="transactionForm.controls.paidOrReceivedAt.touched && transactionForm.controls.paidOrReceivedAt.hasError('required')"
         >
           Informe a data da transação.
+        </small>
+        <small
+          class="field-error"
+          *ngIf="transactionForm.controls.paidOrReceivedAt.touched && transactionForm.controls.paidOrReceivedAt.hasError('futureDate')"
+        >
+          A data da transação não pode ser futura.
         </small>
 
         <p class="message error" role="alert" *ngIf="formError">{{ formError }}</p>
