@@ -143,6 +143,8 @@ namespace Fin.Api.Common.Api
                 .Services
                 .AddTransient<ITransactionHandler, TransactionHandler>();
 
+            builder.Services.AddSingleton(TimeProvider.System);
+
             builder.Services.Configure<JwtSettings>(
                 builder.Configuration.GetSection("JwtSettings"));
 

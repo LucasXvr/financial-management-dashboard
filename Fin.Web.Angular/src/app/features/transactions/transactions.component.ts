@@ -69,7 +69,10 @@ export class TransactionsComponent implements OnInit {
       type: [TransactionType.Withdraw, Validators.required],
       amount: ['', [Validators.required, currencyValidator]],
       categoryId: [0, [Validators.required, Validators.min(1)]],
-      paidOrReceivedAt: [todayForInput(), Validators.required]
+      paidOrReceivedAt: [
+        todayForInput(),
+        [Validators.required, futureDateValidator]
+      ]
     });
   }
 
@@ -312,6 +315,15 @@ export class TransactionsComponent implements OnInit {
 function currencyValidator(control: AbstractControl<string>): ValidationErrors | null {
   const amountInCents = parseCurrencyToCents(control.value);
   return amountInCents !== null && amountInCents > 0 ? null : { currency: true };
+}
+
+function futureDateValidator(
+  control: AbstractControl<string>
+): ValidationErrors | null {
+  const value = control.value;
+  if (!value) return null;
+
+  return value > todayForInput() ? { futureDate: true } : null;
 }
 
 function parseCurrencyToCents(value: string): number | null {

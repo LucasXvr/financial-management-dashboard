@@ -13,10 +13,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fin.Api.Handlers
 {
-    public class TransactionHandler(AppDbContext context) : ITransactionHandler
+    public class TransactionHandler(
+        AppDbContext context,
+        TimeProvider? timeProvider = null) : ITransactionHandler
     {
+        private static readonly TimeZoneInfo SaoPauloTimeZone =
+            TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
+
+        private readonly TimeProvider _timeProvider = timeProvider ?? TimeProvider.System;
+
         public async Task<Response<Transaction?>> CreateAsync(CreateTransactionRequest request)
         {
+            if (IsFutureDate(request.PaidOrReceivedAt))
+                return FutureDateResponse();
+
             if (request.Type == ETransactionType.Withdraw)
                 request.Amount = -Math.Abs(request.Amount);
             else
@@ -142,6 +152,9 @@ namespace Fin.Api.Handlers
 
         public async Task<Response<Transaction?>> UpdateAsync(UpdateTransactionRequest request)
         {
+            if (IsFutureDate(request.PaidOrReceivedAt))
+                return FutureDateResponse();
+
             if (request.Type == ETransactionType.Withdraw)
                 request.Amount = -Math.Abs(request.Amount);
             else
@@ -324,5 +337,21 @@ namespace Fin.Api.Handlers
                 .OrderByDescending(t => t.CreatedAt)
                 .ToListAsync();
         }
+
+        private bool IsFutureDate(DateTime? date)
+        {
+            if (!date.HasValue)
+                return false;
+
+            var nowInSaoPaulo = TimeZoneInfo.ConvertTime(
+                _timeProvider.GetUtcNow(),
+                SaoPauloTimeZone);
+
+            return DateOnly.FromDateTime(date.Value) >
+                   DateOnly.FromDateTime(nowInSaoPaulo.DateTime);
+        }
+
+        private static Response<Transaction?> FutureDateResponse()
+            => new(null, 400, "A data da transação não pode ser futura");
     }
 }
