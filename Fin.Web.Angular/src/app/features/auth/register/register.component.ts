@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-register',
@@ -15,12 +16,15 @@ export class RegisterComponent {
   protected loading = false;
   protected errorMessage = '';
   protected successMessage = '';
+  protected showPassword = false;
+  protected showConfirmPassword = false;
   protected readonly registerForm;
 
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
+    protected readonly theme: ThemeService
   ) {
     this.registerForm = this.formBuilder.nonNullable.group({
       name: ['', [Validators.required]],
@@ -74,5 +78,13 @@ export class RegisterComponent {
           this.errorMessage = error.message;
         }
       });
+  }
+
+  protected togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  protected toggleConfirmPasswordVisibility(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 }

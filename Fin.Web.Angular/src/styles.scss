@@ -62,4 +62,25 @@ body {
   font-family: Inter, 'Segoe UI', Roboto, Arial, sans-serif;
   background: #f3f4f6;
   color: #111827;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+html.dark,
+html.dark body {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+html.dark .confirmation-modal {
+  border: 1px solid #334155;
+  background: #1e293b;
+
+  h3 { color: #f8fafc; }
+  p { color: #cbd5e1; }
+}
+
+html.dark .modal-actions button:not(.confirm-delete) {
+  border-color: #475569;
+  background: #0f172a;
+  color: #e2e8f0;
 }

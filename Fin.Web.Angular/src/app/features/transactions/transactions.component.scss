@@ -287,6 +287,17 @@ li {
   }
 }
 
+:host-context(.dark) {
+  .page-header h2, .panel h3, .transaction-content strong { color: #f8fafc; }
+  .page-header p, .list-header p, .transaction-content p, .pagination { color: #cbd5e1; }
+  .panel { border-color: #334155; background: #1e293b; }
+  form label { color: #e2e8f0; }
+  form input, form select, .secondary-button, .transaction-actions button, .pagination button { border-color: #475569; background: #0f172a; color: #e2e8f0; }
+  form input::placeholder { color: #94a3b8; }
+  li, .pagination { border-color: #334155; }
+  .state { background: #0f172a; color: #cbd5e1; }
+}
+
 @media (width <= 840px) {
   .content-grid,
   .form-row {

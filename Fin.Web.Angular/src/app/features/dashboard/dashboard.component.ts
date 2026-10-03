@@ -64,12 +64,21 @@ export class DashboardComponent implements OnInit {
   }
 
   protected barHeight(value: number): number {
-    const maximum = Math.max(
+    const maximum = this.chartMaximum;
+    if (value === 0 || maximum === 0) return 0;
+    return Math.max(6, (value / maximum) * 100);
+  }
+
+  protected get chartScale(): number[] {
+    const maximum = this.chartMaximum;
+    return [maximum, maximum * 0.75, maximum * 0.5, maximum * 0.25, 0];
+  }
+
+  private get chartMaximum(): number {
+    return Math.max(
       0,
       ...this.monthlyData.flatMap((item) => [item.income, item.expenses])
     );
-    if (value === 0 || maximum === 0) return 0;
-    return Math.max(6, (value / maximum) * 100);
   }
 
   protected loadSummary(): void {
@@ -94,5 +103,14 @@ export class DashboardComponent implements OnInit {
 
   protected formatCurrency(value: number): string {
     return this.currencyFormatter.format(value);
+  }
+
+  protected formatCompactCurrency(value: number): string {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      notation: 'compact',
+      maximumFractionDigits: 1
+    }).format(value);
   }
 }

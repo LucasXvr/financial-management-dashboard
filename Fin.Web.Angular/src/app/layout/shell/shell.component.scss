@@ -1,92 +1,32 @@
-:host {
-  display: block;
+:host { display: block; }
+.shell { min-height: 100dvh; background: #f4f7f5; }
+.app-header { position: sticky; top: 0; z-index: 15; border-bottom: 1px solid rgb(255 255 255 / 12%); background: #052e16; color: #fff; box-shadow: 0 8px 30px rgb(5 46 22 / 14%); }
+.header-content { width: min(1180px, calc(100% - 2rem)); min-height: 72px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+.brand { display: inline-flex; align-items: center; }
+.brand img { display: block; width: auto; height: 42px; }
+nav { display: flex; align-items: center; gap: 0.35rem; }
+nav a, nav button { min-height: 42px; border: 0; border-radius: 10px; padding: 0.65rem 0.85rem; display: inline-flex; align-items: center; gap: 0.45rem; background: transparent; color: #d1fae5; cursor: pointer; font: inherit; font-weight: 650; text-decoration: none; transition: 160ms ease; }
+nav a:hover, nav a.active, nav button:hover { background: rgb(34 197 94 / 18%); color: #fff; transform: translateY(-1px); }
+nav svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+nav .filled-icon { fill: currentColor; stroke: none; }
+.logout-button { margin-left: 0.45rem; border-left: 1px solid rgb(255 255 255 / 18%) !important; border-radius: 0 10px 10px 0 !important; }
+.menu-toggle { display: none; width: 42px; height: 42px; border: 1px solid rgb(255 255 255 / 22%); border-radius: 10px; place-items: center; background: transparent; color: #fff; cursor: pointer; }
+.menu-toggle svg { width: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+main { width: min(1180px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 3rem; }
+.theme-toggle { width: 42px; justify-content: center; padding-inline: 0 !important; font-size: 1.2rem !important; }
+
+:host-context(.dark) {
+  .shell { background: #0f172a; }
+  .app-header, nav { background: #020617; }
 }
 
-.shell {
-  min-height: 100dvh;
-  display: grid;
-  grid-template-columns: 240px 1fr;
-}
-
-aside {
-  background: #111827;
-  color: #fff;
-  padding: 1.5rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  h2 {
-    margin: 0;
-    font-size: 1.1rem;
-  }
-
-  nav {
-    display: grid;
-    gap: 0.25rem;
-  }
-
-  a {
-    color: #d1d5db;
-    text-decoration: none;
-    padding: 0.6rem;
-    border-radius: 8px;
-  }
-
-  a.active,
-  a:hover {
-    background: #1f2937;
-    color: #fff;
-  }
-
-  button {
-    margin-top: auto;
-    border: 1px solid #374151;
-    background: transparent;
-    color: #fff;
-    border-radius: 8px;
-    padding: 0.65rem;
-    cursor: pointer;
-  }
-}
-
-main {
-  background: #f3f4f6;
-
-  header {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
-    background: #fff;
-
-    h1 {
-      margin: 0;
-      font-size: 1.2rem;
-      color: #111827;
-    }
-  }
-
-  section {
-    padding: 1.5rem;
-  }
-}
-
-@media (width <= 900px) {
-  .shell {
-    grid-template-columns: 1fr;
-  }
-
-  aside {
-    flex-direction: row;
-    align-items: center;
-
-    nav {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    button {
-      margin-top: 0;
-      margin-left: auto;
-    }
-  }
+@media (width <= 760px) {
+  .header-content { min-height: 64px; position: relative; }
+  .brand img { height: 36px; }
+  .menu-toggle { display: grid; }
+  nav { position: absolute; top: calc(100% + 1px); right: 0; left: 0; display: none; padding: 0.75rem; flex-direction: column; align-items: stretch; background: #052e16; border-radius: 0 0 14px 14px; box-shadow: 0 16px 30px rgb(5 46 22 / 24%); }
+  nav.open { display: flex; }
+  nav a, nav button { width: 100%; justify-content: flex-start; }
+  .logout-button { margin: 0.35rem 0 0; border-top: 1px solid rgb(255 255 255 / 18%) !important; border-left: 0 !important; border-radius: 0 0 10px 10px !important; }
+  main { padding-top: 1.25rem; }
 }

@@ -307,6 +307,17 @@ li {
   background: #10b981;
 }
 
+:host-context(.dark) {
+  .page-header h2, .panel h3, li strong, .confirmation-modal h3 { color: #f8fafc; }
+  .page-header p, .list-header p, li p, .pagination, .confirmation-modal p { color: #cbd5e1; }
+  .panel, .confirmation-modal { border-color: #334155; background: #1e293b; }
+  form label { color: #e2e8f0; }
+  form input, form textarea, .secondary-button, .category-actions button, .pagination button, .modal-actions button:not(.confirm-delete) { border-color: #475569; background: #0f172a; color: #e2e8f0; }
+  form input::placeholder, form textarea::placeholder { color: #94a3b8; }
+  li, .pagination { border-color: #334155; }
+  .state { background: #0f172a; color: #cbd5e1; }
+}
+
 @media (width <= 780px) {
   .content-grid {
     grid-template-columns: 1fr;

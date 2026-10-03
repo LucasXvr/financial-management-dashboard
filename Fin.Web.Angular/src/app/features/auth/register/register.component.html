@@ -1,10 +1,18 @@
 <section class="auth-page">
+  <a class="back-link" routerLink="/">← Voltar ao início</a>
+  <button class="theme-toggle" type="button" (click)="theme.toggle()" [attr.aria-label]="theme.darkMode() ? 'Ativar modo claro' : 'Ativar modo escuro'" [attr.title]="theme.darkMode() ? 'Modo claro' : 'Modo escuro'">
+    <span aria-hidden="true">{{ theme.darkMode() ? '☀' : '☾' }}</span>
+  </button>
   <form class="auth-card" [formGroup]="registerForm" (ngSubmit)="submit()">
-    <h1>Criar Conta</h1>
-    <p>Cadastre-se para usar o dashboard financeiro.</p>
+    <div class="brand"><img src="/icone.png" alt="" /></div>
+    <div class="auth-heading">
+      <h1>Criar conta</h1>
+      <p>Comece a organizar sua vida financeira.</p>
+    </div>
 
     <label for="name">Nome</label>
     <input id="name" type="text" formControlName="name" placeholder="Seu nome" />
+    <small *ngIf="registerForm.controls.name.touched && registerForm.controls.name.invalid">Informe seu nome.</small>
 
     <label for="email">Email</label>
     <input
@@ -13,34 +21,35 @@
       formControlName="email"
       placeholder="voce@empresa.com"
     />
+    <small *ngIf="registerForm.controls.email.touched && registerForm.controls.email.invalid">Informe um email válido.</small>
 
     <label for="password">Senha</label>
-    <input
-      id="password"
-      type="password"
-      formControlName="password"
-      placeholder="********"
-    />
+    <div class="password-field">
+      <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Crie uma senha" />
+      <button class="password-toggle" type="button" (click)="togglePasswordVisibility()" [attr.aria-label]="showPassword ? 'Ocultar senha' : 'Mostrar senha'">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+      </button>
+    </div>
+    <span class="password-hint">8 caracteres, com maiúscula, minúscula, número e símbolo.</span>
 
     <label for="confirmPassword">Confirmar senha</label>
-    <input
-      id="confirmPassword"
-      type="password"
-      formControlName="confirmPassword"
-      placeholder="********"
-    />
+    <div class="password-field">
+      <input id="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Repita a senha" />
+      <button class="password-toggle" type="button" (click)="toggleConfirmPasswordVisibility()" [attr.aria-label]="showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+      </button>
+    </div>
 
-    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-    <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
+    <p class="error" role="alert" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p class="success" role="status" *ngIf="successMessage">{{ successMessage }}</p>
 
     <button type="submit" [disabled]="loading">
       {{ loading ? 'Criando conta...' : 'Criar conta' }}
     </button>
 
     <div class="auth-links">
-      <a routerLink="/">Voltar para pagina inicial</a>
       <span>
-        Ja tem conta?
+        Já tem uma conta?
         <a routerLink="/login">Entrar</a>
       </span>
     </div>

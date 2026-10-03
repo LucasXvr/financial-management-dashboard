@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-login',
@@ -14,13 +15,15 @@ import { AuthService } from '../../../core/services/auth.service';
 export class LoginComponent {
   protected loading = false;
   protected errorMessage = '';
+  protected showPassword = false;
 
   protected readonly loginForm;
 
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly authService: AuthService,
-    private readonly router: Router
+    private readonly router: Router,
+    protected readonly theme: ThemeService
   ) {
     this.loginForm = this.formBuilder.nonNullable.group({
       email: ['', [Validators.required, Validators.email]],
@@ -48,5 +51,9 @@ export class LoginComponent {
         this.errorMessage = error.message;
       }
     });
+  }
+
+  protected togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 }
