@@ -1,5 +1,6 @@
 <div class="dashboard-header">
   <div>
+    <span class="eyebrow">Painel financeiro</span>
     <h2>Visão geral</h2>
     <p>Receitas e despesas do mês atual, com saldo acumulado de todo o histórico.</p>
   </div>
@@ -20,18 +21,27 @@
 
   <div class="cards">
     <article>
+      <div class="card-heading">
+        <div class="card-icon income-icon">↗</div>
+        <small>Mês atual</small>
+      </div>
       <strong>Receitas</strong>
-      <small>Mês atual</small>
       <span class="income">{{ formatCurrency(data.income) }}</span>
     </article>
     <article>
+      <div class="card-heading">
+        <div class="card-icon expense-icon">↘</div>
+        <small>Mês atual</small>
+      </div>
       <strong>Despesas</strong>
-      <small>Mês atual</small>
       <span class="expense">{{ formatCurrency(data.expenses) }}</span>
     </article>
     <article>
+      <div class="card-heading">
+        <div class="card-icon balance-icon">$</div>
+        <small>Todo o histórico</small>
+      </div>
       <strong>Saldo acumulado</strong>
-      <small>Todo o histórico</small>
       <span [class.negative]="data.balance < 0">{{ formatCurrency(data.balance) }}</span>
     </article>
   </div>
@@ -67,23 +77,22 @@
       <span><i class="expense-key"></i>Despesas</span>
     </div>
 
-    <div class="chart-plot">
-      <div class="month-group" *ngFor="let item of monthlyData">
-        <div class="bars" aria-hidden="true">
-          <span
-            class="bar income-bar"
-            [style.height.%]="barHeight(item.income)"
-            [title]="'Receitas: ' + formatCurrency(item.income)"
-          ></span>
-          <span
-            class="bar expense-bar"
-            [style.height.%]="barHeight(item.expenses)"
-            [title]="'Despesas: ' + formatCurrency(item.expenses)"
-          ></span>
+    <div class="chart-layout">
+      <div class="chart-axis" aria-hidden="true">
+        <span *ngFor="let value of chartScale">{{ formatCompactCurrency(value) }}</span>
+      </div>
+      <div class="chart-plot">
+        <div class="month-group" *ngFor="let item of monthlyData">
+          <div class="bars" aria-hidden="true">
+            <span class="bar income-bar" [style.height.%]="barHeight(item.income)" [title]="'Receitas: ' + formatCurrency(item.income)"></span>
+            <span class="bar expense-bar" [style.height.%]="barHeight(item.expenses)" [title]="'Despesas: ' + formatCurrency(item.expenses)"></span>
+          </div>
+          <strong>{{ item.month }}</strong>
+          <div class="month-values">
+            <span class="month-value income-text">{{ formatCurrency(item.income) }}</span>
+            <span class="month-value expense-text">{{ formatCurrency(item.expenses) }}</span>
+          </div>
         </div>
-        <strong>{{ item.month }}</strong>
-        <span class="month-value income-text">{{ formatCurrency(item.income) }}</span>
-        <span class="month-value expense-text">{{ formatCurrency(item.expenses) }}</span>
       </div>
     </div>
   </div>

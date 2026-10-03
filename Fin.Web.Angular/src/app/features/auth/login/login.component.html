@@ -1,7 +1,14 @@
 <section class="auth-page">
+  <a class="back-link" routerLink="/">← Voltar ao início</a>
+  <button class="theme-toggle" type="button" (click)="theme.toggle()" [attr.aria-label]="theme.darkMode() ? 'Ativar modo claro' : 'Ativar modo escuro'" [attr.title]="theme.darkMode() ? 'Modo claro' : 'Modo escuro'">
+    <span aria-hidden="true">{{ theme.darkMode() ? '☀' : '☾' }}</span>
+  </button>
   <form class="auth-card" [formGroup]="loginForm" (ngSubmit)="submit()">
-    <h1>Entrar no Sistema</h1>
-    <p>Entre para acessar sua area financeira.</p>
+    <div class="brand"><img src="/icone.png" alt="" /></div>
+    <div class="auth-heading">
+      <h1>Entrar no sistema</h1>
+      <p>Acesse sua área financeira com segurança.</p>
+    </div>
 
     <label for="email">Email</label>
     <input
@@ -18,12 +25,16 @@
     </small>
 
     <label for="password">Senha</label>
-    <input
-      id="password"
-      type="password"
-      formControlName="password"
-      placeholder="********"
-    />
+    <div class="password-field">
+      <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Sua senha" />
+      <button class="password-toggle" type="button" (click)="togglePasswordVisibility()" [attr.aria-label]="showPassword ? 'Ocultar senha' : 'Mostrar senha'">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path *ngIf="!showPassword" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z"></path>
+          <circle *ngIf="!showPassword" cx="12" cy="12" r="2.5"></circle>
+          <path *ngIf="showPassword" d="m4 4 16 16M10.6 6.2A9.8 9.8 0 0 1 12 6c6 0 9.5 6 9.5 6a15 15 0 0 1-2.2 3M7.2 7.3A15.1 15.1 0 0 0 2.5 12s3.5 6 9.5 6a9.9 9.9 0 0 0 3-.5"></path>
+        </svg>
+      </button>
+    </div>
 
     <small
       *ngIf="
@@ -34,16 +45,15 @@
       Informe sua senha.
     </small>
 
-    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p class="error" role="alert" *ngIf="errorMessage">{{ errorMessage }}</p>
 
     <button type="submit" [disabled]="loading">
       {{ loading ? 'Entrando...' : 'Entrar' }}
     </button>
 
     <div class="auth-links">
-      <a routerLink="/">Voltar para pagina inicial</a>
       <span>
-        Nao tem conta?
+        Não tem uma conta?
         <a routerLink="/register">Criar conta</a>
       </span>
     </div>
