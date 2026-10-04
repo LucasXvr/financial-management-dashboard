@@ -316,11 +316,19 @@ namespace Fin.Api.Handlers
                                t.PaidOrReceivedAt < nextMonth)
                     .SumAsync(t => t.Amount);
 
+                var savings = await context.Transactions
+                    .Where(t => t.UserId == userId &&
+                               t.Type == ETransactionType.Saving &&
+                               t.PaidOrReceivedAt >= startOfMonth &&
+                               t.PaidOrReceivedAt < nextMonth)
+                    .SumAsync(t => t.Amount);
+
                 result.Add(new TransactionsByMonthDTO
                 {
                     Month = date.ToString("MMM", new System.Globalization.CultureInfo("pt-BR")),
                     Income = income,
-                    Expenses = Math.Abs(expenses)
+                    Expenses = Math.Abs(expenses),
+                    Savings = Math.Abs(savings)
                 });
             }
 

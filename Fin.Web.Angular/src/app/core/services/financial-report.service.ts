@@ -5,6 +5,7 @@ import { Observable, forkJoin, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PagedResponse } from '../models/category.models';
 import {
+  ExpenseByCategory,
   FinancialSummary,
   MonthlyFinancialData
 } from '../models/financial-report.models';
@@ -46,6 +47,14 @@ export class FinancialReportService {
     return this.http.get<MonthlyFinancialData[]>(`${this.reportsUrl}/by-month`, {
       params: { months: 6 }
     });
+  }
+
+  getCurrentMonthExpensesByCategory(): Observable<ExpenseByCategory[]> {
+    const { startDate, endDate } = currentMonthPeriod();
+    return this.http.get<ExpenseByCategory[]>(
+      `${this.reportsUrl}/expenses-by-category`,
+      { params: { startDate, endDate } }
+    );
   }
 }
 

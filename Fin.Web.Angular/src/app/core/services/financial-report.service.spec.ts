@@ -78,13 +78,33 @@ describe('FinancialReportService', () => {
     expect(request.request.params.get('months')).toBe('6');
 
     request.flush([
-      { month: 'ago.', income: 0, expenses: 0 },
-      { month: 'set.', income: 500, expenses: 123.45 }
+      { month: 'ago.', income: 0, expenses: 0, savings: 0 },
+      { month: 'set.', income: 500, expenses: 123.45, savings: 716.26 }
     ]);
 
     expect(result).toEqual([
-      { month: 'ago.', income: 0, expenses: 0 },
-      { month: 'set.', income: 500, expenses: 123.45 }
+      { month: 'ago.', income: 0, expenses: 0, savings: 0 },
+      { month: 'set.', income: 500, expenses: 123.45, savings: 716.26 }
+    ]);
+  });
+
+  it('requests current-month expenses grouped by category', () => {
+    let result: unknown;
+    service.getCurrentMonthExpensesByCategory().subscribe((value) => result = value);
+
+    const request = httpTesting.expectOne((item) =>
+      item.url.endsWith('/v1/financial-reports/expenses-by-category'));
+    expect(request.request.params.get('startDate')).toMatch(/-01T00:00:00\.000$/);
+    expect(request.request.params.get('endDate')).toMatch(/T23:59:59\.999$/);
+
+    request.flush([
+      { category: 'Casa', amount: 2641.52 },
+      { category: 'Assinaturas', amount: 72.25 }
+    ]);
+
+    expect(result).toEqual([
+      { category: 'Casa', amount: 2641.52 },
+      { category: 'Assinaturas', amount: 72.25 }
     ]);
   });
 });

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 
 import {
+  ExpenseByCategory,
   FinancialSummary,
   MonthlyFinancialData
 } from '../../core/models/financial-report.models';
@@ -20,11 +21,18 @@ export class DashboardComponent implements OnInit {
   protected monthlyData: MonthlyFinancialData[] = [];
   protected chartLoading = true;
   protected chartError = '';
+  protected categoryExpenses: ExpenseByCategory[] = [];
+  protected categoryExpensesLoading = true;
+  protected categoryExpensesError = '';
 
   private readonly currencyFormatter = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
     minimumFractionDigits: 2
+  });
+  private readonly percentageFormatter = new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1
   });
 
   constructor(
@@ -35,6 +43,27 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.loadSummary();
     this.loadMonthlyReport();
+    this.loadCategoryExpenses();
+  }
+
+  protected loadCategoryExpenses(): void {
+    this.categoryExpensesLoading = true;
+    this.categoryExpensesError = '';
+    this.changeDetectorRef.markForCheck();
+
+    this.financialReportService.getCurrentMonthExpensesByCategory().subscribe({
+      next: (expenses) => {
+        this.categoryExpenses = expenses;
+        this.categoryExpensesLoading = false;
+        this.changeDetectorRef.markForCheck();
+      },
+      error: () => {
+        this.categoryExpenses = [];
+        this.categoryExpensesError = 'Não foi possível carregar as despesas por categoria.';
+        this.categoryExpensesLoading = false;
+        this.changeDetectorRef.markForCheck();
+      }
+    });
   }
 
   protected loadMonthlyReport(): void {
@@ -59,7 +88,7 @@ export class DashboardComponent implements OnInit {
 
   protected get chartIsEmpty(): boolean {
     return this.monthlyData.length === 0 || this.monthlyData.every(
-      (item) => item.income === 0 && item.expenses === 0
+      (item) => item.income === 0 && item.expenses === 0 && item.savings === 0
     );
   }
 
@@ -74,10 +103,20 @@ export class DashboardComponent implements OnInit {
     return [maximum, maximum * 0.75, maximum * 0.5, maximum * 0.25, 0];
   }
 
+  protected categoryBarWidth(amount: number): number {
+    const maximum = Math.max(0, ...this.categoryExpenses.map((item) => item.amount));
+    return maximum === 0 ? 0 : (amount / maximum) * 100;
+  }
+
+  protected categoryPercentage(amount: number): number {
+    const total = this.categoryExpenses.reduce((sum, item) => sum + item.amount, 0);
+    return total === 0 ? 0 : (amount / total) * 100;
+  }
+
   private get chartMaximum(): number {
     return Math.max(
       0,
-      ...this.monthlyData.flatMap((item) => [item.income, item.expenses])
+      ...this.monthlyData.flatMap((item) => [item.income, item.expenses, item.savings])
     );
   }
 
@@ -112,5 +151,9 @@ export class DashboardComponent implements OnInit {
       notation: 'compact',
       maximumFractionDigits: 1
     }).format(value);
+  }
+
+  protected formatPercentage(value: number): string {
+    return `${this.percentageFormatter.format(value)}%`;
   }
 }

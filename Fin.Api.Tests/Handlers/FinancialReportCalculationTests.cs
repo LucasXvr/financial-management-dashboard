@@ -45,6 +45,7 @@ public class FinancialReportCalculationTests
 
         Assert.Equal(1250.50m, monthly.Income);
         Assert.Equal(200.25m, monthly.Expenses);
+        Assert.Equal(0m, monthly.Savings);
         Assert.Equal(1050.25m, balance.Balance);
         Assert.Equal(200.25m, byCategory.Amount);
     }
@@ -115,6 +116,7 @@ public class FinancialReportCalculationTests
             Transaction(category, "Despesa intermediária", ETransactionType.Withdraw, -50m, currentMonth.AddMonths(-3).AddDays(4)),
             Transaction(category, "Receita intermediária", ETransactionType.Deposit, 250.50m, currentMonth.AddMonths(-2).AddDays(5)),
             Transaction(category, "Receita atual", ETransactionType.Deposit, 500m, currentMonth.AddDays(6)),
+            Transaction(category, "Reserva atual", ETransactionType.Saving, 716.26m, currentMonth.AddDays(7)),
             Transaction(category, "Despesa atual", ETransactionType.Withdraw, -123.45m, PeriodEnd));
         await context.SaveChangesAsync();
 
@@ -122,12 +124,12 @@ public class FinancialReportCalculationTests
 
         Assert.Collection(
             result,
-            item => AssertMonth(item, 1000m, 100m),
-            item => AssertMonth(item, 0m, 0m),
-            item => AssertMonth(item, 0m, 50m),
-            item => AssertMonth(item, 250.50m, 0m),
-            item => AssertMonth(item, 0m, 0m),
-            item => AssertMonth(item, 500m, 123.45m));
+            item => AssertMonth(item, 1000m, 100m, 0m),
+            item => AssertMonth(item, 0m, 0m, 0m),
+            item => AssertMonth(item, 0m, 50m, 0m),
+            item => AssertMonth(item, 250.50m, 0m, 0m),
+            item => AssertMonth(item, 0m, 0m, 0m),
+            item => AssertMonth(item, 500m, 123.45m, 716.26m));
     }
 
     private static AppDbContext CreateContext()
@@ -168,10 +170,12 @@ public class FinancialReportCalculationTests
     private static void AssertMonth(
         Fin.Core.Responses.TransactionsByMonthDTO item,
         decimal income,
-        decimal expenses)
+        decimal expenses,
+        decimal savings)
     {
         Assert.Equal(income, item.Income);
         Assert.Equal(expenses, item.Expenses);
+        Assert.Equal(savings, item.Savings);
     }
 
     private static Transaction Transaction(

@@ -9,4 +9,10 @@ export interface MonthlyFinancialData {
   month: string;
   income: number;
   expenses: number;
+  savings: number;
+}
+
+export interface ExpenseByCategory {
+  category: string;
+  amount: number;
 }
