@@ -13,7 +13,9 @@ nav .filled-icon { fill: currentColor; stroke: none; }
 .menu-toggle { display: none; width: 42px; height: 42px; border: 1px solid rgb(255 255 255 / 22%); border-radius: 10px; place-items: center; background: transparent; color: #fff; cursor: pointer; }
 .menu-toggle svg { width: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 main { width: min(1180px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 3rem; }
-.theme-toggle { width: 42px; justify-content: center; padding-inline: 0 !important; font-size: 1.2rem !important; }
+.header-actions { display: flex; align-items: center; gap: 0.5rem; }
+.theme-toggle { width: 42px; height: 42px; border: 1px solid rgb(255 255 255 / 22%); border-radius: 10px; display: grid; place-items: center; padding: 0; background: transparent; color: #fff; cursor: pointer; font: inherit; font-size: 1.2rem; transition: 160ms ease; }
+.theme-toggle:hover { background: rgb(34 197 94 / 18%); transform: translateY(-1px); }
 
 :host-context(.dark) {
   .shell { background: #0f172a; }
@@ -24,6 +26,7 @@ main { width: min(1180px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 3r
   .header-content { min-height: 64px; position: relative; }
   .brand img { height: 36px; }
   .menu-toggle { display: grid; }
+  .header-actions { margin-left: auto; }
   nav { position: absolute; top: calc(100% + 1px); right: 0; left: 0; display: none; padding: 0.75rem; flex-direction: column; align-items: stretch; background: #052e16; border-radius: 0 0 14px 14px; box-shadow: 0 16px 30px rgb(5 46 22 / 24%); }
   nav.open { display: flex; }
   nav a, nav button { width: 100%; justify-content: flex-start; }

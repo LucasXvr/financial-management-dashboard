@@ -47,6 +47,7 @@
   </div>
 </ng-container>
 
+<div class="dashboard-charts">
 <section class="chart-panel" aria-labelledby="monthly-chart-title">
   <div class="chart-header">
     <div>
@@ -63,18 +64,19 @@
     {{ chartError }}
   </p>
   <p class="state empty" *ngIf="!chartLoading && !chartError && chartIsEmpty">
-    Nenhuma receita ou despesa registrada nos últimos 6 meses.
+    Nenhuma receita, despesa ou reserva registrada nos últimos 6 meses.
   </p>
 
   <div
     class="monthly-chart"
     role="img"
-    aria-label="Comparação de receitas e despesas dos últimos 6 meses"
+    aria-label="Comparação de receitas, despesas e reservas dos últimos 6 meses"
     *ngIf="!chartLoading && !chartError && !chartIsEmpty"
   >
     <div class="chart-legend" aria-hidden="true">
       <span><i class="income-key"></i>Receitas</span>
       <span><i class="expense-key"></i>Despesas</span>
+      <span><i class="savings-key"></i>Reservas</span>
     </div>
 
     <div class="chart-layout">
@@ -86,14 +88,49 @@
           <div class="bars" aria-hidden="true">
             <span class="bar income-bar" [style.height.%]="barHeight(item.income)" [title]="'Receitas: ' + formatCurrency(item.income)"></span>
             <span class="bar expense-bar" [style.height.%]="barHeight(item.expenses)" [title]="'Despesas: ' + formatCurrency(item.expenses)"></span>
+            <span class="bar savings-bar" [style.height.%]="barHeight(item.savings)" [title]="'Reservas: ' + formatCurrency(item.savings)"></span>
           </div>
           <strong>{{ item.month }}</strong>
           <div class="month-values">
             <span class="month-value income-text">{{ formatCurrency(item.income) }}</span>
             <span class="month-value expense-text">{{ formatCurrency(item.expenses) }}</span>
+            <span class="month-value savings-text">{{ formatCurrency(item.savings) }}</span>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<section class="chart-panel category-chart-panel" aria-labelledby="category-chart-title">
+  <div class="chart-header">
+    <div>
+      <h3 id="category-chart-title">Despesas por categoria</h3>
+      <p>Mês atual · cinco maiores</p>
+    </div>
+    <button type="button" (click)="loadCategoryExpenses()" [disabled]="categoryExpensesLoading" *ngIf="categoryExpensesError">
+      Tentar novamente
+    </button>
+  </div>
+
+  <p class="state" *ngIf="categoryExpensesLoading">Carregando despesas por categoria...</p>
+  <p class="state error" role="alert" *ngIf="!categoryExpensesLoading && categoryExpensesError">
+    {{ categoryExpensesError }}
+  </p>
+  <p class="state empty" *ngIf="!categoryExpensesLoading && !categoryExpensesError && categoryExpenses.length === 0">
+    Nenhuma despesa registrada no mês atual.
+  </p>
+
+  <div class="category-bars" *ngIf="!categoryExpensesLoading && !categoryExpensesError && categoryExpenses.length > 0">
+    <div class="category-row" *ngFor="let item of categoryExpenses">
+      <div class="category-label">
+        <strong>{{ item.category }}</strong>
+        <span>{{ formatCurrency(item.amount) }} · {{ formatPercentage(categoryPercentage(item.amount)) }}</span>
+      </div>
+      <div class="category-track" aria-hidden="true">
+        <span [style.width.%]="categoryBarWidth(item.amount)"></span>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
