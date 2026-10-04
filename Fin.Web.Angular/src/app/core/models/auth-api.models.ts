@@ -22,6 +22,16 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  token: string;
+  newPassword: string;
+}
+
 export function extractToken(body: unknown): string | null {
   if (!body || typeof body !== 'object') {
     return null;

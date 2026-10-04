@@ -25,6 +25,7 @@
     </small>
 
     <label for="password">Senha</label>
+    <a class="forgot-password-link" routerLink="/forgot-password">Esqueceu a senha?</a>
     <div class="password-field">
       <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Sua senha" />
       <button class="password-toggle" type="button" (click)="togglePasswordVisibility()" [attr.aria-label]="showPassword ? 'Ocultar senha' : 'Mostrar senha'">

@@ -12,6 +12,9 @@ using Fin.Core.Common.Extensions;
 using Fin.Core.Handlers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -152,6 +155,20 @@ namespace Fin.Api.Common.Api
                 provider.GetRequiredService<IOptions<JwtSettings>>().Value);
 
             builder.Services.AddSingleton<ITokenService, TokenService>();
+            builder.Services.Configure<EmailSettings>(
+                builder.Configuration.GetSection("EmailSettings"));
+            builder.Services.AddTransient<IPasswordResetEmailSender, PasswordResetEmailSender>();
+            builder.Services.AddRateLimiter(options =>
+            {
+                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+                options.AddFixedWindowLimiter("password-recovery", limiter =>
+                {
+                    limiter.PermitLimit = 5;
+                    limiter.Window = TimeSpan.FromMinutes(1);
+                    limiter.QueueLimit = 0;
+                    limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                });
+            });
 
             builder.Services.AddIdentity<User, IdentityRole<long>>(options => 
             {
@@ -168,6 +185,9 @@ namespace Fin.Api.Common.Api
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
+
+            builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+                options.TokenLifespan = TimeSpan.FromMinutes(30));
         }
     }
 }

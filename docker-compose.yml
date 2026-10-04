@@ -10,11 +10,22 @@ services:
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__DefaultConnection=Server=db;Database=FinancialDB;User Id=sa;Password=${SQL_SERVER_PASSWORD:?Set SQL_SERVER_PASSWORD in .env};TrustServerCertificate=True;MultipleActiveResultSets=true;Encrypt=False;Connect Timeout=30
       - JwtSettings__SecretKey=${JWT_SECRET:?Set JWT_SECRET in .env}
-      - FrontendUrl=http://localhost:5173
+      - FrontendUrl=http://localhost:4200
       - BackendUrl=http://localhost:5110
+      - EmailSettings__Host=${SMTP_HOST:-mailpit}
+      - EmailSettings__Port=${SMTP_PORT:-1025}
+      - EmailSettings__FromAddress=${SMTP_FROM_ADDRESS:-no-reply@minhasfinancas.local}
+      - EmailSettings__FromName=${SMTP_FROM_NAME:-Minhas Finanças}
+      - EmailSettings__Username=${SMTP_USERNAME:-}
+      - EmailSettings__Password=${SMTP_PASSWORD:-}
+      - EmailSettings__EnableSsl=${SMTP_ENABLE_SSL:-false}
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
+    volumes:
+      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
     networks:
       - financial-network
     command: >
@@ -46,9 +57,18 @@ services:
       retries: 10
       start_period: 30s
 
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - financial-network
+
 networks:
   financial-network:
     driver: bridge
 
 volumes:
   sqldata:
+  dataprotection-keys:

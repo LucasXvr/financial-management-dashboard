@@ -122,8 +122,11 @@
 .auth-card > button[type='submit'] { min-height: 46px; border-radius: 10px; background: #16a34a; box-shadow: 0 10px 20px rgb(22 163 74 / 20%); }
 .auth-card > button[type='submit']:hover:not(:disabled) { background: #15803d; }
 .auth-card .error { border: 1px solid #fecaca; border-radius: 9px; padding: 0.7rem; background: #fef2f2; }
+.auth-card .success { margin: 0; border: 1px solid #bbf7d0; border-radius: 9px; padding: 0.7rem; background: #f0fdf4; color: #166534; font-size: 0.85rem; }
 .auth-links { border-top: 1px solid #e5e7eb; padding-top: 1rem; }
 .auth-links a { color: #15803d; font-weight: 700; }
+.forgot-password-link { justify-self: end; margin-top: -0.25rem; color: #15803d; font-size: 0.82rem; font-weight: 700; text-decoration: none; }
+.forgot-password-link:hover { text-decoration: underline; }
 .theme-toggle { position: absolute; top: 1.2rem; right: 1.5rem; width: 42px; height: 42px; border: 1px solid #bbf7d0; border-radius: 11px; display: grid; place-items: center; background: rgb(255 255 255 / 70%); color: #166534; cursor: pointer; font-size: 1.25rem; }
 
 :host-context(.dark) {
