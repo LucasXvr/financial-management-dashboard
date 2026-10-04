@@ -25,7 +25,9 @@ namespace Fin.Api.Endpoints
             endpoints.MapGroup("v1/identity")
                 .WithTags("Identity")
                 .MapEndpoint<LoginEndpoint>()
-                .MapEndpoint<RegisterEndpoint>();
+                .MapEndpoint<RegisterEndpoint>()
+                .MapEndpoint<ForgotPasswordEndpoint>()
+                .MapEndpoint<ResetPasswordEndpoint>();
 
             endpoints.MapGroup("v1/categories")
                 .WithTags("Categories")

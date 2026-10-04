@@ -8,7 +8,7 @@ O frontend original foi construído em React e está sendo migrado gradualmente 
 
 ### API .NET 8
 
-- Cadastro e login com JWT.
+- Cadastro, login com JWT e recuperação de senha por email.
 - Autorização e isolamento de dados por usuário.
 - CRUD de categorias e transações.
 - Paginação e relatórios financeiros.
@@ -19,6 +19,7 @@ O frontend original foi construído em React e está sendo migrado gradualmente 
 ### Frontend Angular
 
 - Página inicial, cadastro e login.
+- Solicitação e redefinição de senha por link temporário.
 - Persistência da sessão, guards e interceptor JWT.
 - Layout autenticado e logout.
 - Listagem paginada, cadastro, edição e exclusão de categorias.
@@ -28,9 +29,6 @@ O frontend original foi construído em React e está sendo migrado gradualmente 
 
 ### Migração pendente
 
-- Gerenciamento de transações no Angular.
-- Dashboard com dados reais.
-- Gráficos e relatórios financeiros.
 - Demais recursos ainda presentes apenas no frontend React.
 
 ## Regras de segurança e integridade
@@ -70,7 +68,7 @@ O frontend original foi construído em React e está sendo migrado gradualmente 
 ### Infraestrutura
 
 - Docker e Docker Compose
-- SQL Server em contêiner
+- SQL Server e Mailpit em contêineres
 
 ## Estrutura
 
@@ -102,6 +100,13 @@ ConnectionStrings__DefaultConnection
 JwtSettings__SecretKey
 FrontendUrl
 BackendUrl
+EmailSettings__Host
+EmailSettings__Port
+EmailSettings__FromAddress
+EmailSettings__FromName
+EmailSettings__Username
+EmailSettings__Password
+EmailSettings__EnableSsl
 ```
 
 ## API e banco com Docker
@@ -123,8 +128,43 @@ Serviços padrão:
 - API: `http://localhost:5110`
 - Swagger: `http://localhost:5110/swagger`
 - SQL Server: `localhost:1200`
+- Caixa de email local (Mailpit): `http://localhost:8025`
 
-As migrations são aplicadas durante a inicialização da API. O healthcheck impede que ela inicie antes de o SQL Server aceitar conexões.
+As migrations são aplicadas durante a inicialização da API. O healthcheck impede que ela inicie antes de o SQL Server aceitar conexões. Em desenvolvimento, os emails de recuperação ficam disponíveis no Mailpit e não são enviados para endereços externos.
+
+### Envio de email externo
+
+O mesmo fluxo pode enviar o link para uma caixa real. Copie `.env.example` para `.env` e substitua a configuração local por dados fornecidos pelo serviço SMTP. Exemplo fictício:
+
+```text
+SMTP_HOST=smtp.example-provider.com
+SMTP_PORT=587
+SMTP_FROM_ADDRESS=no-reply@minhasfinancas.example
+SMTP_FROM_NAME=Minhas Finanças
+SMTP_USERNAME=portfolio-user@example.com
+SMTP_PASSWORD=replace-with-provider-api-key-or-app-password
+SMTP_ENABLE_SSL=true
+```
+
+Esses valores são apenas um modelo e não representam credenciais válidas. O arquivo `.env` está ignorado pelo Git e deve guardar os valores reais somente no ambiente local. Em produção, configure os mesmos nomes no gerenciador de segredos da hospedagem.
+
+Quando o usuário solicita a recuperação, a API procura a conta, gera um token de uso único com validade de 30 minutos e cria um link para `FrontendUrl/reset-password`. O serviço SMTP entrega esse link. Ao definir a nova senha, o ASP.NET Identity valida o token e o invalida após o uso. A resposta da solicitação é sempre genérica para não revelar se um email está cadastrado.
+
+Configurações comuns:
+
+- Porta `587` com `SMTP_ENABLE_SSL=true`: conexão SMTP com STARTTLS, usada pela maioria dos provedores.
+- `SMTP_USERNAME`: usuário SMTP ou identificador fornecido pelo provedor.
+- `SMTP_PASSWORD`: senha de aplicativo ou chave SMTP. Nunca use uma senha pessoal nem faça commit desse valor.
+- `SMTP_FROM_ADDRESS`: remetente previamente autorizado ou verificado no provedor.
+- `FrontendUrl`: endereço público do Angular. O link enviado será baseado nesse valor.
+
+Depois de alterar o `.env`, recrie a API:
+
+```bash
+docker compose up -d --build api
+```
+
+Se as variáveis `SMTP_*` permanecerem com os valores locais, a API continuará usando o Mailpit. Ele ainda pode ficar ativo no Docker quando um provedor externo estiver configurado, mas não receberá as mensagens.
 
 Para encerrar os serviços:
 
@@ -192,6 +232,8 @@ npm run build
 ```text
 POST /v1/identity/register
 POST /v1/identity/login
+POST /v1/identity/forgot-password
+POST /v1/identity/reset-password
 ```
 
 ### Categorias
