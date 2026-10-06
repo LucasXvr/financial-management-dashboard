@@ -40,8 +40,8 @@ namespace Fin.Api.Endpoints.Transactions
                 UserId = userId,
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                StartDate = startDate,
-                EndDate = endDate
+                StartDate = startDate?.Date,
+                EndDate = endDate?.Date.AddDays(1).AddTicks(-1)
             };
 
             var result = await handler.GetByPeriodAsync(request);

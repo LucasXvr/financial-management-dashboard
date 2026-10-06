@@ -133,21 +133,32 @@
             {{ totalCount }} {{ totalCount === 1 ? 'transação' : 'transações' }}
           </p>
         </div>
-        <button
-          class="secondary-button"
-          type="button"
-          (click)="loadTransactions()"
-          [disabled]="loading"
-          *ngIf="loadError"
-        >
-          Tentar novamente
+        <button class="export-button" type="button" (click)="exportTransactions()" [disabled]="exporting">
+          {{ exporting ? 'Gerando Excel...' : 'Exportar Excel' }}
         </button>
       </div>
+
+      <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
+        <div>
+          <label for="filter-start-date">Data inicial</label>
+          <input id="filter-start-date" type="date" formControlName="startDate" />
+        </div>
+        <div>
+          <label for="filter-end-date">Data final</label>
+          <input id="filter-end-date" type="date" formControlName="endDate" />
+        </div>
+        <button type="submit" [disabled]="loading">Filtrar</button>
+        <button class="clear-filter" type="button" (click)="clearFilters()" [disabled]="loading">Limpar</button>
+      </form>
+      <p class="message error" role="alert" *ngIf="exportError">{{ exportError }}</p>
 
       <p class="state" *ngIf="loading">Carregando transações...</p>
       <p class="message error" role="alert" *ngIf="!loading && loadError">
         {{ loadError }}
       </p>
+      <button class="secondary-button" type="button" (click)="loadTransactions()" [disabled]="loading" *ngIf="!loading && loadError">
+        Tentar novamente
+      </button>
       <p class="state" *ngIf="!loading && !loadError && transactions.length === 0">
         Nenhuma transação cadastrada. Use o formulário para criar a primeira.
       </p>

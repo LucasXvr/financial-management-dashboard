@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl } from '@angular/forms';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { CategoryService } from '../../core/services/category.service';
 import {
@@ -136,6 +136,56 @@ describe('TransactionsComponent', () => {
     expect(transactionService.lastDeletedId).toBe(10);
     expect(transactionService.requestedPages.at(-1)).toBe(1);
   });
+
+  it('uses the selected period for the list and Excel export', () => {
+    const component = fixture.componentInstance as unknown as {
+      filterForm: { setValue(value: Record<string, string>): void };
+      applyFilters(): void;
+      exportTransactions(): void;
+    };
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: () => 'blob:transactions'
+    });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: () => undefined
+    });
+    const originalClick = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = () => undefined;
+
+    component.filterForm.setValue({
+      startDate: '2026-09-01',
+      endDate: '2026-09-30'
+    });
+    component.applyFilters();
+    component.exportTransactions();
+
+    expect(transactionService.lastRequestedPeriod).toEqual({
+      startDate: '2026-09-01',
+      endDate: '2026-09-30'
+    });
+    expect(transactionService.lastExportedPeriod).toEqual({
+      startDate: '2026-09-01',
+      endDate: '2026-09-30'
+    });
+    HTMLAnchorElement.prototype.click = originalClick;
+  });
+
+  it('shows an error and releases the button when Excel export fails', () => {
+    transactionService.failExport = true;
+    const component = fixture.componentInstance as unknown as {
+      exportTransactions(): void;
+      exporting: boolean;
+    };
+
+    component.exportTransactions();
+    fixture.detectChanges();
+
+    expect(component.exporting).toBe(false);
+    expect((fixture.nativeElement as HTMLElement).textContent)
+      .toContain('Falha simulada na exportação.');
+  });
 });
 
 class TransactionServiceMock {
@@ -144,6 +194,9 @@ class TransactionServiceMock {
   lastUpdatedPayload: CreateTransactionRequest | null = null;
   lastDeletedId: number | null = null;
   requestedPages: number[] = [];
+  lastRequestedPeriod: { startDate: string; endDate: string } | null = null;
+  lastExportedPeriod: { startDate: string; endDate: string } | null = null;
+  failExport = false;
   readonly transaction = {
     id: 10,
     title: 'Compra do mês',
@@ -156,8 +209,14 @@ class TransactionServiceMock {
     isSavings: false
   };
 
-  getTransactions(pageNumber = 1) {
+  getTransactions(
+    pageNumber = 1,
+    _pageSize = 10,
+    startDate = '2000-01-01',
+    endDate = '2100-12-31'
+  ) {
     this.requestedPages.push(pageNumber);
+    this.lastRequestedPeriod = { startDate, endDate };
     return of({
       data: [this.transaction],
       currentPage: pageNumber,
@@ -165,6 +224,15 @@ class TransactionServiceMock {
       pageSize: 10,
       totalCount: 1
     });
+  }
+
+  exportTransactions(startDate: string, endDate: string) {
+    this.lastExportedPeriod = { startDate, endDate };
+    if (this.failExport)
+      return throwError(() => new Error('Falha simulada na exportação.'));
+    return of(new Blob(['xlsx'], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    }));
   }
 
   createTransaction(payload: CreateTransactionRequest) {
