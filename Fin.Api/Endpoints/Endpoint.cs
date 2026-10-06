@@ -45,7 +45,8 @@ namespace Fin.Api.Endpoints
                 .MapEndpoint<UpdateTransactionEndpoint>()
                 .MapEndpoint<DeleteTransactionEndpoint>()
                 .MapEndpoint<GetTransactionByIdEndpoint>()
-                .MapEndpoint<GetTransactionsByPeriodEndpoint>();
+                .MapEndpoint<GetTransactionsByPeriodEndpoint>()
+                .MapEndpoint<ExportTransactionsEndpoint>();
 
             endpoints.MapGroup("v1/financial-reports")
                 .WithTags("Financial Reports")

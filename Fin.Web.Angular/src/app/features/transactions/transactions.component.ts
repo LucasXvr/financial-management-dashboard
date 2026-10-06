@@ -41,6 +41,8 @@ export class TransactionsComponent implements OnInit {
   protected transactionPendingDeletion: Transaction | null = null;
   protected deleting = false;
   protected deleteError = '';
+  protected exporting = false;
+  protected exportError = '';
   protected readonly pageSize = 10;
   protected readonly transactionTypes = [
     { value: TransactionType.Deposit, label: 'Receita' },
@@ -48,6 +50,7 @@ export class TransactionsComponent implements OnInit {
     { value: TransactionType.Saving, label: 'Reserva' }
   ];
   protected readonly transactionForm;
+  protected readonly filterForm;
 
   private readonly currencyFormatter = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -74,6 +77,10 @@ export class TransactionsComponent implements OnInit {
         [Validators.required, futureDateValidator]
       ]
     });
+    this.filterForm = this.formBuilder.nonNullable.group({
+      startDate: ['2000-01-01', Validators.required],
+      endDate: ['2100-12-31', Validators.required]
+    });
   }
 
   ngOnInit(): void {
@@ -86,7 +93,20 @@ export class TransactionsComponent implements OnInit {
     this.loadError = '';
     this.changeDetectorRef.markForCheck();
 
-    this.transactionService.getTransactions(pageNumber, this.pageSize).subscribe({
+    const period = this.filterForm.getRawValue();
+    if (period.startDate > period.endDate) {
+      this.loadError = 'A data inicial deve ser anterior ou igual à data final.';
+      this.loading = false;
+      this.changeDetectorRef.markForCheck();
+      return;
+    }
+
+    this.transactionService.getTransactions(
+      pageNumber,
+      this.pageSize,
+      period.startDate,
+      period.endDate
+    ).subscribe({
       next: (response) => {
         this.transactions = response.data ?? [];
         this.currentPage = response.currentPage;
@@ -101,6 +121,58 @@ export class TransactionsComponent implements OnInit {
           'Não foi possível carregar as transações.'
         );
         this.loading = false;
+        this.changeDetectorRef.markForCheck();
+      }
+    });
+  }
+
+  protected applyFilters(): void {
+    this.exportError = '';
+    if (this.filterForm.invalid) {
+      this.filterForm.markAllAsTouched();
+      return;
+    }
+    this.loadTransactions(1);
+  }
+
+  protected clearFilters(): void {
+    this.filterForm.reset({ startDate: '2000-01-01', endDate: '2100-12-31' });
+    this.exportError = '';
+    this.loadTransactions(1);
+  }
+
+  protected exportTransactions(): void {
+    this.exportError = '';
+    if (this.filterForm.invalid || this.exporting) {
+      this.filterForm.markAllAsTouched();
+      return;
+    }
+
+    const period = this.filterForm.getRawValue();
+    if (period.startDate > period.endDate) {
+      this.exportError = 'A data inicial deve ser anterior ou igual à data final.';
+      return;
+    }
+
+    this.exporting = true;
+    this.changeDetectorRef.markForCheck();
+    this.transactionService.exportTransactions(period.startDate, period.endDate).subscribe({
+      next: (file) => {
+        const url = URL.createObjectURL(file);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `transacoes-${period.startDate}-a-${period.endDate}.xlsx`;
+        link.click();
+        URL.revokeObjectURL(url);
+        this.exporting = false;
+        this.changeDetectorRef.markForCheck();
+      },
+      error: (error: unknown) => {
+        this.exportError = this.getErrorMessage(
+          error,
+          'Não foi possível exportar as transações.'
+        );
+        this.exporting = false;
         this.changeDetectorRef.markForCheck();
       }
     });

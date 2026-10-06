@@ -14,7 +14,7 @@ namespace Fin.Api.Endpoints.Transactions
     public class GetTransactionByIdEndpoint : IEndpoint
     {
         public static void Map(IEndpointRouteBuilder app)
-            => app.MapGet("/{id}", HandleAsync)
+            => app.MapGet("/{id:long}", HandleAsync)
                 .WithName("Transactions: Get By Id")
                 .WithSummary("Recupera uma transação")
                 .WithDescription("Recupera uma transação")

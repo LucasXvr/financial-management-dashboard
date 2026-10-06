@@ -176,6 +176,31 @@ form {
   font-size: 0.88rem;
 }
 
+.export-button {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  background: #047857;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+
+  &:disabled { cursor: wait; opacity: 0.65; }
+}
+
+.filters {
+  grid-template-columns: minmax(130px, 1fr) minmax(130px, 1fr) auto auto;
+  align-items: end;
+  gap: 0.65rem;
+  margin-top: 1rem;
+
+  div { min-width: 0; }
+  label { margin-top: 0; }
+  input { min-height: 42px; }
+  button { min-height: 42px; margin-top: 0; padding-inline: 0.85rem; }
+  .clear-filter { border: 1px solid #d1d5db; background: #fff; color: #374151; }
+}
+
 ul {
   margin: 1rem 0 0;
   padding: 0;
@@ -293,6 +318,7 @@ li {
   .panel { border-color: #334155; background: #1e293b; }
   form label { color: #e2e8f0; }
   form input, form select, .secondary-button, .transaction-actions button, .pagination button { border-color: #475569; background: #0f172a; color: #e2e8f0; }
+  .filters .clear-filter { border-color: #475569; background: #0f172a; color: #e2e8f0; }
   form input::placeholder { color: #94a3b8; }
   li, .pagination { border-color: #334155; }
   .state { background: #0f172a; color: #cbd5e1; }
@@ -303,6 +329,8 @@ li {
   .form-row {
     grid-template-columns: 1fr;
   }
+
+  .filters { grid-template-columns: 1fr 1fr; }
 }
 
 @media (width <= 520px) {
@@ -311,4 +339,7 @@ li {
     flex-direction: column;
     gap: 0.35rem;
   }
+
+  .list-header { align-items: flex-start; flex-direction: column; }
+  .filters { grid-template-columns: 1fr; }
 }

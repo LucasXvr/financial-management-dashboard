@@ -146,6 +146,8 @@ namespace Fin.Api.Common.Api
                 .Services
                 .AddTransient<ITransactionHandler, TransactionHandler>();
 
+            builder.Services.AddTransient<ITransactionExportService, TransactionExportService>();
+
             builder.Services.AddSingleton(TimeProvider.System);
 
             builder.Services.Configure<JwtSettings>(

@@ -2,7 +2,7 @@
 
 Aplicação de gerenciamento financeiro pessoal criada como projeto de portfólio full stack com **ASP.NET Core 8**, **Angular**, **React** e **SQL Server**.
 
-O frontend original foi construído em React e está sendo migrado gradualmente para Angular. A aplicação Angular já oferece autenticação e gerenciamento de categorias integrados à API.
+O frontend original foi construído em React e está sendo migrado gradualmente para Angular. A aplicação Angular já oferece autenticação, dashboard financeiro e gerenciamento de categorias e transações integrados à API.
 
 ## Estado atual
 
@@ -11,6 +11,7 @@ O frontend original foi construído em React e está sendo migrado gradualmente 
 - Cadastro, login com JWT e recuperação de senha por email.
 - Autorização e isolamento de dados por usuário.
 - CRUD de categorias e transações.
+- Exportação de todas as transações de um período em Excel (`.xlsx`).
 - Paginação e relatórios financeiros.
 - Swagger/OpenAPI em desenvolvimento.
 - Migrations com Entity Framework Core.
@@ -23,6 +24,10 @@ O frontend original foi construído em React e está sendo migrado gradualmente 
 - Persistência da sessão, guards e interceptor JWT.
 - Layout autenticado e logout.
 - Listagem paginada, cadastro, edição e exclusão de categorias.
+- Listagem paginada, cadastro, edição e exclusão de transações.
+- Filtro de transações por período e exportação em Excel com estado de processamento e tratamento de erro.
+- Dashboard com totais reais, evolução mensal e despesas por categoria.
+- Modos claro e escuro, com layout responsivo.
 - Estados de carregamento, lista vazia, validação e erro.
 - Atualização da interface em modo sem Zone.js.
 - Mensagem de erro ao tentar excluir uma categoria vinculada a transações.
@@ -48,6 +53,7 @@ O frontend original foi construído em React e está sendo migrado gradualmente 
 - ASP.NET Core Identity
 - JWT Bearer Authentication
 - SQL Server 2022
+- ClosedXML para geração de planilhas Excel
 - Swagger/OpenAPI
 - xUnit
 
@@ -215,7 +221,7 @@ docker run --rm -v "${PWD}:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0 \
   dotnet test FinancialManagementDashboard.sln --configuration Release
 ```
 
-Os testes atuais verificam o isolamento de categorias entre dois usuários e a preservação dos lançamentos quando uma exclusão inválida é solicitada.
+Os testes atuais verificam o isolamento de categorias e transações entre usuários, a preservação dos lançamentos quando uma exclusão inválida é solicitada e o conteúdo da exportação Excel. A planilha é validada para garantir que datas sejam células de data, valores sejam células numéricas, todos os registros do período sejam incluídos e dados de outros usuários não sejam exportados.
 
 ### Angular
 
@@ -250,6 +256,7 @@ DELETE /v1/categories/{id}
 
 ```text
 GET    /v1/transactions
+GET    /v1/transactions/export?startDate=2026-01-01&endDate=2026-12-31
 GET    /v1/transactions/{id}
 POST   /v1/transactions
 PUT    /v1/transactions/{id}
@@ -258,13 +265,20 @@ DELETE /v1/transactions/{id}
 
 Consulte o Swagger para os contratos completos e os endpoints de relatórios.
 
+### Exportação em Excel
+
+Na tela de transações, selecione as datas inicial e final e use **Exportar Excel**. O arquivo inclui todos os lançamentos do período selecionado, mesmo quando a listagem possui várias páginas. A API identifica o usuário pelo JWT e não aceita um identificador de usuário enviado pelo navegador.
+
+A planilha contém as colunas **Data**, **Título**, **Tipo**, **Categoria** e **Valor**. Datas e valores são gravados com tipos nativos do Excel, permitindo somas, filtros, ordenação, tabelas dinâmicas e gráficos. Despesas permanecem negativas; receitas e reservas permanecem positivas.
+
+A geração utiliza [ClosedXML](https://github.com/ClosedXML/ClosedXML), distribuído sob a licença MIT.
+
 ## Próximos passos
 
-- Implementar o gerenciamento de transações no Angular.
-- Migrar dashboard, gráficos e relatórios.
 - Adicionar testes HTTP e testes de jornada do usuário.
+- Evoluir os relatórios e filtros do dashboard.
+- Preparar configuração e observabilidade para publicação em produção.
 - Criar pipeline de CI para build e testes.
-- Substituir as credenciais de desenvolvimento versionadas por exemplos seguros.
 
 ## Autor
 

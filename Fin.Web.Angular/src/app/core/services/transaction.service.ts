@@ -19,15 +19,24 @@ export class TransactionService {
 
   getTransactions(
     pageNumber: number,
-    pageSize: number
+    pageSize: number,
+    startDate = '2000-01-01',
+    endDate = '2100-12-31'
   ): Observable<TransactionPagedResponse> {
     return this.http.get<TransactionPagedResponse>(this.transactionsUrl, {
       params: {
-        startDate: '2000-01-01',
-        endDate: '2100-12-31',
+        startDate,
+        endDate,
         pageNumber,
         pageSize
       }
+    });
+  }
+
+  exportTransactions(startDate: string, endDate: string): Observable<Blob> {
+    return this.http.get(`${this.transactionsUrl}/export`, {
+      params: { startDate, endDate },
+      responseType: 'blob'
     });
   }
 
