@@ -151,7 +151,7 @@ article p {
   }
 }
 
-/* Visual alinhado à versão React, sem depender de Tailwind ou biblioteca de gráficos. */
+/* Composição visual da página inicial sem dependências adicionais de estilo. */
 .landing { overflow: hidden; background: #f7faf8; }
 .topbar { position: relative; z-index: 5; padding: 0; box-shadow: 0 8px 28px rgb(5 46 22 / 14%); }
 .topbar-content { min-height: 72px; }
