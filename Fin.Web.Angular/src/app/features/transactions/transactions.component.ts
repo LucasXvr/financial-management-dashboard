@@ -77,9 +77,10 @@ export class TransactionsComponent implements OnInit {
         [Validators.required, futureDateValidator]
       ]
     });
+    const currentYear = new Date().getFullYear();
     this.filterForm = this.formBuilder.nonNullable.group({
-      startDate: ['2000-01-01', Validators.required],
-      endDate: ['2100-12-31', Validators.required]
+      startDate: [`${currentYear}-01-01`, Validators.required],
+      endDate: [`${currentYear}-12-31`, Validators.required]
     });
   }
 
