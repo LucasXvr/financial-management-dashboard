@@ -1,0 +1,12 @@
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/assets/*", "/*.css", "/*.js", "/*.png", "/*.ico", "/*.json"]
+  },
+  "globalHeaders": {
+    "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://api.minhasfinancas.example; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",
+    "Referrer-Policy": "no-referrer",
+    "X-Content-Type-Options": "nosniff",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+  }
+}

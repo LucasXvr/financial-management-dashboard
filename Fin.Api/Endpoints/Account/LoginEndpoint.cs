@@ -17,6 +17,7 @@ public class LoginEndpoint : IEndpoint
             .WithDescription("Autentica um usuário e retorna um token JWT")
             .WithOrder(1)
             .AllowAnonymous()
+            .RequireRateLimiting("authentication")
             .Produces<Response<LoginResponse>>();
 
     private static async Task<IResult> HandleAsync(

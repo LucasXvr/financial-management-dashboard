@@ -4,10 +4,10 @@ services:
       context: .
       dockerfile: Fin.Api/Dockerfile
     ports:
-      - "5110:80"
+      - "5110:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Server=db;Database=FinancialDB;User Id=sa;Password=${SQL_SERVER_PASSWORD:?Set SQL_SERVER_PASSWORD in .env};TrustServerCertificate=True;MultipleActiveResultSets=true;Encrypt=False;Connect Timeout=30
       - JwtSettings__SecretKey=${JWT_SECRET:?Set JWT_SECRET in .env}
       - FrontendUrl=http://localhost:4200
@@ -19,6 +19,9 @@ services:
       - EmailSettings__Username=${SMTP_USERNAME:-}
       - EmailSettings__Password=${SMTP_PASSWORD:-}
       - EmailSettings__EnableSsl=${SMTP_ENABLE_SSL:-false}
+      - SeedAdmin__Enabled=${SEED_ADMIN_ENABLED:-false}
+      - SeedAdmin__Email=${SEED_ADMIN_EMAIL:-}
+      - SeedAdmin__Password=${SEED_ADMIN_PASSWORD:-}
     depends_on:
       db:
         condition: service_healthy
@@ -28,10 +31,6 @@ services:
       - dataprotection-keys:/root/.aspnet/DataProtection-Keys
     networks:
       - financial-network
-    command: >
-      sh -c "sleep 15 &&
-             dotnet ef database update --project /src/Fin.Api --startup-project /src/Fin.Api &&
-             dotnet Fin.Api.dll"
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest

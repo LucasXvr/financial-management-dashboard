@@ -2,7 +2,7 @@
   <div>
     <span class="eyebrow">Painel financeiro</span>
     <h2>Visão geral</h2>
-    <p>Receitas e despesas do mês atual, com saldo acumulado de todo o histórico.</p>
+    <p>Movimentação do mês, dinheiro disponível na conta e reservas acumuladas.</p>
   </div>
   <button type="button" (click)="loadSummary()" [disabled]="loading" *ngIf="errorMessage">
     Tentar novamente
@@ -16,7 +16,7 @@
 
 <ng-container *ngIf="!loading && !errorMessage && summary as data">
   <p class="state empty" *ngIf="data.transactionCount === 0">
-    Nenhuma transação registrada no mês atual. O saldo acumulado continua considerando todo o histórico.
+    Nenhuma transação registrada no mês atual. O dinheiro em conta continua considerando todo o histórico.
   </p>
 
   <div class="cards">
@@ -41,10 +41,43 @@
         <div class="card-icon balance-icon">$</div>
         <small>Todo o histórico</small>
       </div>
-      <strong>Saldo acumulado</strong>
-      <span [class.negative]="data.balance < 0">{{ formatCurrency(data.balance) }}</span>
+      <strong>Disponível em conta</strong>
+      <span [class.negative]="data.availableBalance < 0">{{ formatCurrency(data.availableBalance) }}</span>
+      <small>Resultado histórico: {{ formatCurrency(data.historicalResult) }}</small>
+      <button class="balance-action" type="button" (click)="openBalanceForm()">
+        {{ data.accountIsReconciled ? 'Ajustar saldo' : 'Informar saldo real' }}
+      </button>
+    </article>
+    <article>
+      <div class="card-heading">
+        <div class="card-icon savings-icon">◆</div>
+        <small>Todo o histórico</small>
+      </div>
+      <strong>Reservas</strong>
+      <span class="savings">{{ formatCurrency(data.savingsBalance) }}</span>
     </article>
   </div>
+
+  <p class="balance-note" *ngIf="!data.accountIsReconciled">
+    O disponível ainda parte de saldo inicial zero. Informe o saldo real do banco para reconciliar a conta.
+  </p>
+  <p class="state success" role="status" *ngIf="reconcileSuccess">{{ reconcileSuccess }}</p>
+
+  <form class="balance-form" [formGroup]="balanceForm" (ngSubmit)="reconcileBalance()" *ngIf="showBalanceForm">
+    <div>
+      <label for="current-balance">Saldo atual da conta</label>
+      <input id="current-balance" type="text" inputmode="decimal" formControlName="currentBalance" placeholder="1.874,02">
+      <small *ngIf="balanceForm.controls.currentBalance.touched && balanceForm.controls.currentBalance.invalid">
+        Informe um valor válido, com até duas casas decimais.
+      </small>
+    </div>
+    <p>O sistema calculará o ajuste inicial e continuará atualizando o saldo pelas transações.</p>
+    <p class="form-error" role="alert" *ngIf="reconcileError">{{ reconcileError }}</p>
+    <div class="balance-form-actions">
+      <button type="button" (click)="cancelBalanceForm()" [disabled]="reconciling">Cancelar</button>
+      <button type="submit" [disabled]="reconciling">{{ reconciling ? 'Salvando...' : 'Salvar saldo' }}</button>
+    </div>
+  </form>
 </ng-container>
 
 <div class="dashboard-charts">

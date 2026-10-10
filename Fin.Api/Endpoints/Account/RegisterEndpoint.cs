@@ -18,6 +18,7 @@ namespace Fin.Api.Endpoints.Identity
             .WithDescription("Registra um novo usuário no sistema")
             .WithOrder(2)
             .AllowAnonymous()
+            .RequireRateLimiting("registration")
             .Produces<Response<string>>();
 
         private static async Task<IResult> HandleAsync(

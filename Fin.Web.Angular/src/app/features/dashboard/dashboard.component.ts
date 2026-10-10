@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import {
   ExpenseByCategory,
@@ -7,10 +8,11 @@ import {
   MonthlyFinancialData
 } from '../../core/models/financial-report.models';
 import { FinancialReportService } from '../../core/services/financial-report.service';
+import { FinancialAccountService } from '../../core/services/financial-account.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -24,6 +26,11 @@ export class DashboardComponent implements OnInit {
   protected categoryExpenses: ExpenseByCategory[] = [];
   protected categoryExpensesLoading = true;
   protected categoryExpensesError = '';
+  protected reconciling = false;
+  protected reconcileError = '';
+  protected reconcileSuccess = '';
+  protected showBalanceForm = false;
+  protected readonly balanceForm;
 
   private readonly currencyFormatter = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -36,9 +43,15 @@ export class DashboardComponent implements OnInit {
   });
 
   constructor(
+    formBuilder: FormBuilder,
     private readonly financialReportService: FinancialReportService,
+    private readonly financialAccountService: FinancialAccountService,
     private readonly changeDetectorRef: ChangeDetectorRef
-  ) {}
+  ) {
+    this.balanceForm = formBuilder.nonNullable.group({
+      currentBalance: ['', [Validators.required, balanceValidator]]
+    });
+  }
 
   ngOnInit(): void {
     this.loadSummary();
@@ -140,6 +153,60 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  protected openBalanceForm(): void {
+    const value = this.summary?.availableBalance ?? 0;
+    this.balanceForm.setValue({
+      currentBalance: value.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })
+    });
+    this.reconcileError = '';
+    this.reconcileSuccess = '';
+    this.showBalanceForm = true;
+  }
+
+  protected cancelBalanceForm(): void {
+    if (this.reconciling) return;
+    this.showBalanceForm = false;
+    this.reconcileError = '';
+  }
+
+  protected reconcileBalance(): void {
+    if (this.balanceForm.invalid || this.reconciling) {
+      this.balanceForm.markAllAsTouched();
+      return;
+    }
+
+    const balance = parseBalance(this.balanceForm.controls.currentBalance.value);
+    if (balance === null) return;
+
+    this.reconciling = true;
+    this.reconcileError = '';
+    this.financialAccountService.reconcile(balance).subscribe({
+      next: (account) => {
+        if (this.summary) {
+          this.summary = {
+            ...this.summary,
+            availableBalance: account.availableBalance,
+            historicalResult: account.historicalResult,
+            savingsBalance: account.savingsBalance,
+            accountIsReconciled: account.isReconciled
+          };
+        }
+        this.reconciling = false;
+        this.showBalanceForm = false;
+        this.reconcileSuccess = 'Saldo da conta atualizado com sucesso.';
+        this.changeDetectorRef.markForCheck();
+      },
+      error: () => {
+        this.reconciling = false;
+        this.reconcileError = 'Não foi possível atualizar o saldo da conta.';
+        this.changeDetectorRef.markForCheck();
+      }
+    });
+  }
+
   protected formatCurrency(value: number): string {
     return this.currencyFormatter.format(value);
   }
@@ -156,4 +223,26 @@ export class DashboardComponent implements OnInit {
   protected formatPercentage(value: number): string {
     return `${this.percentageFormatter.format(value)}%`;
   }
+}
+
+function balanceValidator(control: { value: string }): { balance: true } | null {
+  return parseBalance(control.value) === null ? { balance: true } : null;
+}
+
+function parseBalance(value: string): number | null {
+  const sanitized = value.trim().replace(/R\$\s?/gi, '').replace(/\s/g, '');
+  if (!sanitized) return null;
+
+  let normalized = sanitized;
+  if (sanitized.includes(',')) {
+    normalized = sanitized.replace(/\./g, '').replace(',', '.');
+  } else if ((sanitized.match(/\./g) ?? []).length > 1) {
+    normalized = sanitized.replace(/\./g, '');
+  }
+
+  if (!/^-?\d+(\.\d{1,2})?$/.test(normalized)) return null;
+  const balance = Number(normalized);
+  return Number.isFinite(balance) && Math.abs(balance) <= 999_999_999_999.99
+    ? balance
+    : null;
 }

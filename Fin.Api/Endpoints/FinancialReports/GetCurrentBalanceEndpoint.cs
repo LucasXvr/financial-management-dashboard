@@ -10,21 +10,21 @@ namespace Fin.Api.Endpoints.FinancialReports
         public static void Map(IEndpointRouteBuilder app)
         => app.MapGet("/current-balance", HandleAsync)
             .WithName("FinancialReports: GetCurrentBalance")
-            .WithSummary("Obtém o saldo acumulado")
-            .WithDescription("Retorna o saldo acumulado do usuário considerando todo o histórico")
+            .WithSummary("Obtém o saldo disponível")
+            .WithDescription("Retorna o saldo disponível após despesas e reservas")
             .WithOrder(1)
             .Produces<decimal>();
 
         private static async Task<IResult> HandleAsync(
             ClaimsPrincipal user,
-            ITransactionHandler handler)
+            IFinancialAccountHandler handler)
         {
             var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
                 return TypedResults.BadRequest(0m);
 
-            var balance = await handler.GetCurrentBalance(userId);
-            return TypedResults.Ok(balance);
+            var account = await handler.GetSummaryAsync(userId);
+            return TypedResults.Ok(account.AvailableBalance);
         }
     }
 }

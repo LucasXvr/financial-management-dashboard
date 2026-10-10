@@ -1,0 +1,38 @@
+name: Build and test
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet restore FinancialManagementDashboard.sln
+      - run: dotnet build FinancialManagementDashboard.sln --configuration Release --no-restore
+      - run: dotnet test FinancialManagementDashboard.sln --configuration Release --no-build
+
+  angular:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Fin.Web.Angular
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Fin.Web.Angular/package-lock.json
+      - run: npm ci
+      - run: npm test -- --watch=false
+      - run: npm run build:production

@@ -290,7 +290,7 @@ article {
 .dashboard-header h2 { color: #052e16; font-size: clamp(1.7rem, 3vw, 2.2rem); letter-spacing: -0.025em; }
 .dashboard-header > div > p { max-width: 720px; }
 
-.cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.15rem; }
+.cards { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.15rem; }
 .cards article { position: relative; overflow: hidden; border-color: #e2e8e4; border-radius: 16px; padding: 1.25rem; gap: 0.3rem; box-shadow: 0 10px 24px rgb(15 23 42 / 5%); }
 .cards article::after { content: ''; position: absolute; right: -32px; bottom: -50px; width: 120px; height: 120px; border-radius: 50%; background: #f0fdf4; }
 .cards article > * { position: relative; z-index: 1; }
@@ -301,6 +301,37 @@ article {
 .income-icon { background: #dcfce7; color: #15803d; }
 .expense-icon { background: #fee2e2; color: #b91c1c; }
 .balance-icon { background: #dbeafe; color: #1d4ed8; }
+.savings-icon { background: #ede9fe; color: #6d28d9; }
+.cards article .savings { color: #2563eb; }
+.cards article .balance-action {
+  width: fit-content;
+  margin-top: 0.45rem;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #047857;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.balance-note { margin: 1rem 0 0; color: #92400e; font-size: 0.86rem; }
+.balance-form {
+  margin-top: 1rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 14px;
+  padding: 1rem;
+  background: #eff6ff;
+  display: grid;
+  gap: 0.75rem;
+}
+.balance-form label { display: block; margin-bottom: 0.35rem; color: #1e3a8a; font-size: 0.85rem; font-weight: 700; }
+.balance-form input { width: min(100%, 280px); box-sizing: border-box; border: 1px solid #93c5fd; border-radius: 8px; padding: 0.7rem; background: #fff; color: #111827; }
+.balance-form small, .form-error { display: block; margin-top: 0.35rem; color: #b91c1c; font-size: 0.78rem; }
+.balance-form > p { margin: 0; font-size: 0.82rem; }
+.balance-form-actions { display: flex; gap: 0.65rem; }
+.balance-form-actions button { border: 1px solid #047857; border-radius: 8px; padding: 0.6rem 0.85rem; background: #fff; color: #047857; cursor: pointer; font-weight: 700; }
+.balance-form-actions button[type='submit'] { background: #047857; color: #fff; }
+.success { background: #ecfdf5; color: #047857; }
 
 .chart-panel { margin-top: 1.5rem; border-color: #e2e8e4; border-radius: 18px; padding: 1.35rem; box-shadow: 0 12px 30px rgb(15 23 42 / 5%); }
 .chart-header h3 { color: #052e16; font-size: 1.15rem; }
@@ -333,6 +364,11 @@ article {
   .category-label strong { color: #e2e8f0; }
   .category-label span { color: #94a3b8; }
   .category-track { background: #334155; }
+  .cards article .balance-action { color: #86efac; }
+  .balance-note { color: #fcd34d; }
+  .balance-form { border-color: #1e40af; background: #172554; }
+  .balance-form label { color: #bfdbfe; }
+  .balance-form input { border-color: #3b82f6; background: #0f172a; color: #f8fafc; }
 }
 
 @media (width <= 760px) {

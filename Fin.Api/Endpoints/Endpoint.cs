@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Fin.Api.Common.Api;
 using Fin.Api.Endpoints.Categories;
+using Fin.Api.Endpoints.Accounts;
 using Fin.Api.Endpoints.FinancialReports;
 using Fin.Api.Endpoints.Identity;
 using Fin.Api.Endpoints.Transactions;
@@ -37,6 +38,12 @@ namespace Fin.Api.Endpoints
                 .MapEndpoint<DeleteCategoryEndpoint>()
                 .MapEndpoint<GetCategoryByIdEndpoint>()
                 .MapEndpoint<GetAllCategoriesEndpoint>();
+
+            endpoints.MapGroup("v1/accounts")
+                .WithTags("Accounts")
+                .RequireAuthorization()
+                .MapEndpoint<GetFinancialAccountEndpoint>()
+                .MapEndpoint<ReconcileFinancialAccountEndpoint>();
 
             endpoints.MapGroup("v1/transactions")
                 .WithTags("Transactions")
