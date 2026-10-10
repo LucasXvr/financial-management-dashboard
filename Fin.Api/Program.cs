@@ -16,57 +16,40 @@ builder.AddDocumentation();
 
 var app = builder.Build();
 
-// Inicializar o banco de dados
-bool dbInitialized = false;
-try
+using (var scope = app.Services.CreateScope())
 {
-    // Garantir que o banco de dados está criado
-    using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await context.Database.MigrateAsync();
-    Console.WriteLine("Migração do banco de dados concluída com sucesso.");
-    
-    // Inicializar roles e usuário admin
-    await DbInitializer.InitializeAsync(app.Services);
-    Console.WriteLine("Banco de dados inicializado com sucesso.");
-    dbInitialized = true;
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"Erro ao inicializar o banco de dados: {ex.Message}");
-    Console.WriteLine(ex.StackTrace);
-    
-    // Tentar inicializar o banco de dados novamente
-    try
-    {
-        using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await context.Database.MigrateAsync();
-        Console.WriteLine("Segunda tentativa de migração do banco de dados concluída com sucesso.");
-        
-        // Inicializar roles e usuário admin
-        await DbInitializer.InitializeAsync(app.Services);
-        Console.WriteLine("Banco de dados inicializado com sucesso na segunda tentativa.");
-        dbInitialized = true;
-    }
-    catch (Exception innerEx)
-    {
-        Console.WriteLine($"Erro na segunda tentativa de inicializar o banco de dados: {innerEx.Message}");
-        Console.WriteLine(innerEx.StackTrace);
-    }
 }
 
-if (!dbInitialized)
-{
-    Console.WriteLine("AVISO: O banco de dados não foi inicializado corretamente. O aplicativo pode não funcionar como esperado.");
-}
+await DbInitializer.InitializeAsync(app.Services, app.Configuration);
 
 if (app.Environment.IsDevelopment())
     app.ConfigureDevEnvironment();
+else
+{
+    app.UseExceptionHandler(exceptionHandler => exceptionHandler.Run(async context =>
+    {
+        await Results.Problem(
+            statusCode: StatusCodes.Status500InternalServerError,
+            title: "Não foi possível processar a solicitação.")
+            .ExecuteAsync(context);
+    }));
+    app.UseHsts();
+    app.UseHttpsRedirection();
+}
 
 app.UseCors(ApiConfiguration.CorsPolicyName);
 app.UseRateLimiter();
 app.UseSecurity();
 app.MapEndpoints();
+app.MapGet("/health", async (AppDbContext context, CancellationToken cancellationToken) =>
+        await context.Database.CanConnectAsync(cancellationToken)
+            ? Results.Ok(new { status = "Healthy" })
+            : Results.Problem(
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                title: "Database unavailable"))
+    .AllowAnonymous()
+    .ExcludeFromDescription();
 
 app.Run();

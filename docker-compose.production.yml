@@ -1,0 +1,31 @@
+services:
+  api:
+    image: ${API_IMAGE:?Set API_IMAGE to the published API container image}
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      ConnectionStrings__DefaultConnection: ${PRODUCTION_DATABASE_CONNECTION:?Set PRODUCTION_DATABASE_CONNECTION}
+      JwtSettings__SecretKey: ${JWT_SECRET:?Set JWT_SECRET}
+      JwtSettings__Issuer: ${JWT_ISSUER:-FinApp}
+      JwtSettings__Audience: ${JWT_AUDIENCE:-FinAppUsers}
+      JwtSettings__ExpiryInMinutes: ${JWT_EXPIRY_MINUTES:-60}
+      FrontendUrl: ${FRONTEND_URL:?Set FRONTEND_URL}
+      BackendUrl: ${BACKEND_URL:?Set BACKEND_URL}
+      AllowedHosts: ${ALLOWED_HOSTS:?Set ALLOWED_HOSTS}
+      EmailSettings__Host: ${SMTP_HOST:?Set SMTP_HOST}
+      EmailSettings__Port: ${SMTP_PORT:-587}
+      EmailSettings__FromAddress: ${SMTP_FROM_ADDRESS:?Set SMTP_FROM_ADDRESS}
+      EmailSettings__FromName: ${SMTP_FROM_NAME:-Minhas Finanças}
+      EmailSettings__Username: ${SMTP_USERNAME:?Set SMTP_USERNAME}
+      EmailSettings__Password: ${SMTP_PASSWORD:?Set SMTP_PASSWORD}
+      EmailSettings__EnableSsl: ${SMTP_ENABLE_SSL:-true}
+      SeedAdmin__Enabled: "false"
+    volumes:
+      - dataprotection-keys:/root/.aspnet/DataProtection-Keys
+
+volumes:
+  dataprotection-keys:

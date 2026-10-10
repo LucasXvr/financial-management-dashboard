@@ -1,7 +1,10 @@
 export interface FinancialSummary {
   income: number;
   expenses: number;
-  balance: number;
+  availableBalance: number;
+  historicalResult: number;
+  savingsBalance: number;
+  accountIsReconciled: boolean;
   transactionCount: number;
 }
 

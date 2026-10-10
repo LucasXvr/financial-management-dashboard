@@ -6,12 +6,18 @@ namespace Fin.Api.Data
 {
     public static class DbInitializer
     {
-        public static async Task InitializeAsync(IServiceProvider serviceProvider)
+        public static async Task InitializeAsync(
+            IServiceProvider serviceProvider,
+            IConfiguration configuration)
         {
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<long>>>();
+            var environment = scope.ServiceProvider.GetRequiredService<IHostEnvironment>();
+            var logger = scope.ServiceProvider
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger("AdminProvisioning");
 
             // Garantir que o banco de dados está criado
             await context.Database.MigrateAsync();
@@ -72,11 +78,51 @@ namespace Fin.Api.Data
                 }
             }
 
-            // Criar usuário admin se não existir
-            var adminEmail = "admin@fin.com";
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            var seedEnabled = configuration.GetValue<bool>("SeedAdmin:Enabled");
+            var initialAction = AdminSeedPolicy.Resolve(
+                environment.IsDevelopment(),
+                seedEnabled);
 
-            if (adminUser == null)
+            if (initialAction == AdminSeedAction.Disabled)
+            {
+                if (environment.IsProduction())
+                {
+                    var existingAdmins = await userManager.GetUsersInRoleAsync("Admin");
+                    if (existingAdmins.Count > 0)
+                    {
+                        logger.LogWarning(
+                            "{AdminCount} conta(s) administrativa(s) existente(s) foram preservadas. " +
+                            "Revise suas credenciais por um processo manual e auditável.",
+                            existingAdmins.Count);
+                    }
+                }
+
+                return;
+            }
+
+            var adminEmail = configuration["SeedAdmin:Email"];
+            var adminPassword = configuration["SeedAdmin:Password"];
+            if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
+                throw new InvalidOperationException(
+                    "SeedAdmin está habilitado, mas Email ou Password não foi configurado.");
+
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            var existingAccountIsAdmin = adminUser is not null &&
+                                         await userManager.IsInRoleAsync(adminUser, "Admin");
+            var action = AdminSeedPolicy.Resolve(
+                environment.IsDevelopment(),
+                seedEnabled,
+                adminUser is not null,
+                existingAccountIsAdmin);
+
+            if (action == AdminSeedAction.PreserveExisting)
+            {
+                logger.LogInformation(
+                    "A conta administrativa configurada já existe. A senha e os dados existentes foram preservados.");
+                return;
+            }
+
+            if (action == AdminSeedAction.Create)
             {
                 var admin = new User
                 {
@@ -85,12 +131,24 @@ namespace Fin.Api.Data
                     EmailConfirmed = true
                 };
 
-                var result = await userManager.CreateAsync(admin, "Admin@123456");
+                var result = await userManager.CreateAsync(admin, adminPassword);
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(admin, "Admin");
+                    var roleResult = await userManager.AddToRoleAsync(admin, "Admin");
+                    if (!roleResult.Succeeded)
+                    {
+                        throw new InvalidOperationException(
+                            "A conta administrativa foi criada, mas não recebeu o papel Admin. " +
+                            "A conta foi preservada para análise manual: " +
+                            string.Join(", ", roleResult.Errors.Select(error => error.Description)));
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        $"Não foi possível criar o administrador inicial: {string.Join(", ", result.Errors.Select(error => error.Description))}");
                 }
             }
         }
     }
-} 
+}

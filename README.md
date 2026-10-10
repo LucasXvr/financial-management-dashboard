@@ -26,7 +26,8 @@ A aplicação oferece autenticação, dashboard financeiro e gerenciamento de ca
 - Listagem paginada, cadastro, edição e exclusão de categorias.
 - Listagem paginada, cadastro, edição e exclusão de transações.
 - Filtro de transações por período e exportação em Excel com estado de processamento e tratamento de erro.
-- Dashboard com totais reais, evolução mensal e despesas por categoria.
+- Dashboard com totais reais, dinheiro disponível em conta, reservas, evolução mensal e despesas por categoria.
+- Reconciliação do saldo bancário: o usuário informa o valor real uma vez e os lançamentos seguintes mantêm o disponível atualizado.
 - Modos claro e escuro, com layout responsivo.
 - Estados de carregamento, lista vazia, validação e erro.
 - Atualização da interface em modo sem Zone.js.
@@ -182,6 +183,13 @@ A aplicação ficará disponível em `http://localhost:4200`.
 
 O servidor de desenvolvimento usa [proxy.conf.json](Fin.Web.Angular/proxy.conf.json) para encaminhar as chamadas da API.
 
+## Ambientes
+
+- **Desenvolvimento:** Docker Compose com API, SQL Server e Mailpit; Angular com proxy local e source maps.
+- **Produção:** Angular otimizado, API em imagem de runtime, banco e SMTP externos, configurações obrigatórias por ambiente e credenciais administrativas desabilitadas por padrão.
+
+O fluxo completo de configuração, validação e promoção para a branch `main` está em [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
 ## API sem Docker
 
 Com o SDK .NET 8 e uma instância do SQL Server disponível:
@@ -209,7 +217,7 @@ docker run --rm -v "${PWD}:/src" -w /src mcr.microsoft.com/dotnet/sdk:8.0 \
   dotnet test FinancialManagementDashboard.sln --configuration Release
 ```
 
-Os testes atuais verificam o isolamento de categorias e transações entre usuários, a preservação dos lançamentos quando uma exclusão inválida é solicitada e o conteúdo da exportação Excel. A planilha é validada para garantir que datas sejam células de data, valores sejam células numéricas, todos os registros do período sejam incluídos e dados de outros usuários não sejam exportados.
+Os testes atuais verificam o isolamento de categorias, transações e saldos entre usuários, a preservação dos lançamentos quando uma exclusão inválida é solicitada, os cálculos de disponível e reservas e o conteúdo da exportação Excel. A planilha é validada para garantir que datas sejam células de data, valores sejam células numéricas, todos os registros do período sejam incluídos e dados de outros usuários não sejam exportados.
 
 ### Angular
 

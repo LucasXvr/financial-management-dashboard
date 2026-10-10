@@ -34,8 +34,8 @@ describe('FinancialReportService', () => {
       request.url.endsWith('/v1/financial-reports/total-income'));
     const expenses = httpTesting.expectOne((request) =>
       request.url.endsWith('/v1/financial-reports/total-expenses'));
-    const balance = httpTesting.expectOne((request) =>
-      request.url.endsWith('/v1/financial-reports/current-balance'));
+    const account = httpTesting.expectOne((request) =>
+      request.url.endsWith('/v1/accounts/default'));
     const transactions = httpTesting.expectOne((request) =>
       request.url.endsWith('/v1/transactions'));
 
@@ -47,12 +47,18 @@ describe('FinancialReportService', () => {
     expect(transactions.request.params.get('endDate')).toBe(endDate);
     expect(startDate).toMatch(/-01T00:00:00\.000$/);
     expect(endDate).toMatch(/T23:59:59\.999$/);
-    expect(balance.request.params.has('startDate')).toBe(false);
-    expect(balance.request.params.has('endDate')).toBe(false);
+    expect(account.request.params.has('startDate')).toBe(false);
+    expect(account.request.params.has('endDate')).toBe(false);
 
     income.flush(1250.50);
     expenses.flush(200.25);
-    balance.flush(1050.25);
+    account.flush({
+      name: 'Conta principal',
+      availableBalance: 850.25,
+      historicalResult: 1050.25,
+      savingsBalance: 200,
+      isReconciled: true
+    });
     transactions.flush({
       data: [],
       currentPage: 1,
@@ -64,7 +70,10 @@ describe('FinancialReportService', () => {
     expect(summary).toEqual({
       income: 1250.50,
       expenses: 200.25,
-      balance: 1050.25,
+      availableBalance: 850.25,
+      historicalResult: 1050.25,
+      savingsBalance: 200,
+      accountIsReconciled: true,
       transactionCount: 3
     });
   });

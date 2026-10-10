@@ -10,13 +10,17 @@ import {
   MonthlyFinancialData
 } from '../models/financial-report.models';
 import { Transaction } from '../models/transaction.models';
+import { FinancialAccountService } from './financial-account.service';
 
 @Injectable({ providedIn: 'root' })
 export class FinancialReportService {
   private readonly reportsUrl = `${environment.apiBaseUrl}/v1/financial-reports`;
   private readonly transactionsUrl = `${environment.apiBaseUrl}/v1/transactions`;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly financialAccountService: FinancialAccountService
+  ) {}
 
   getCurrentMonthSummary(): Observable<FinancialSummary> {
     const { startDate, endDate } = currentMonthPeriod();
@@ -29,15 +33,18 @@ export class FinancialReportService {
       expenses: this.http.get<number>(`${this.reportsUrl}/total-expenses`, {
         params: periodParams
       }),
-      balance: this.http.get<number>(`${this.reportsUrl}/current-balance`),
+      account: this.financialAccountService.getSummary(),
       transactions: this.http.get<PagedResponse<Transaction[]>>(this.transactionsUrl, {
         params: { ...periodParams, pageNumber: 1, pageSize: 1 }
       })
     }).pipe(
-      map(({ income, expenses, balance, transactions }) => ({
+      map(({ income, expenses, account, transactions }) => ({
         income,
         expenses,
-        balance,
+        availableBalance: account.availableBalance,
+        historicalResult: account.historicalResult,
+        savingsBalance: account.savingsBalance,
+        accountIsReconciled: account.isReconciled,
         transactionCount: transactions.totalCount
       }))
     );

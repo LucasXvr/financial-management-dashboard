@@ -7,6 +7,7 @@ import {
   MonthlyFinancialData
 } from '../../core/models/financial-report.models';
 import { FinancialReportService } from '../../core/services/financial-report.service';
+import { FinancialAccountService } from '../../core/services/financial-account.service';
 import { DashboardComponent } from './dashboard.component';
 
 describe('DashboardComponent', () => {
@@ -14,7 +15,10 @@ describe('DashboardComponent', () => {
     const fixture = await createDashboard(of({
       income: 1250.50,
       expenses: 200.25,
-      balance: 1050.25,
+      availableBalance: 850.25,
+      historicalResult: 1050.25,
+      savingsBalance: 200,
+      accountIsReconciled: true,
       transactionCount: 3
     }));
     const text = ((fixture.nativeElement as HTMLElement).textContent ?? '')
@@ -23,7 +27,9 @@ describe('DashboardComponent', () => {
     expect(text).toContain('R$ 1.250,50');
     expect(text).toContain('R$ 200,25');
     expect(text).toContain('R$ 1.050,25');
-    expect(text).toContain('Saldo acumulado');
+    expect(text).toContain('R$ 850,25');
+    expect(text).toContain('Disponível em conta');
+    expect(text).toContain('Reservas');
     expect(text).toContain('Todo o histórico');
   });
 
@@ -31,12 +37,15 @@ describe('DashboardComponent', () => {
     const fixture = await createDashboard(of({
       income: 0,
       expenses: 0,
-      balance: 0,
+      availableBalance: 0,
+      historicalResult: 0,
+      savingsBalance: 0,
+      accountIsReconciled: false,
       transactionCount: 0
     }));
 
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(
-      'Nenhuma transação registrada no mês atual. O saldo acumulado continua considerando todo o histórico.'
+      'Nenhuma transação registrada no mês atual. O dinheiro em conta continua considerando todo o histórico.'
     );
   });
 
@@ -51,7 +60,7 @@ describe('DashboardComponent', () => {
 
   it('renders six monthly income, expense and savings values, including zero months', async () => {
     const fixture = await createDashboard(
-      of({ income: 500, expenses: 123.45, balance: 376.55, transactionCount: 2 }),
+      of(summary(500, 123.45, 376.55, 2)),
       of(KNOWN_MONTHS)
     );
     const text = ((fixture.nativeElement as HTMLElement).textContent ?? '')
@@ -74,7 +83,7 @@ describe('DashboardComponent', () => {
       savings: 0
     }));
     const fixture = await createDashboard(
-      of({ income: 0, expenses: 0, balance: 0, transactionCount: 0 }),
+      of(summary(0, 0, 0, 0)),
       of(zeroMonths)
     );
 
@@ -85,7 +94,7 @@ describe('DashboardComponent', () => {
 
   it('shows a chart error without hiding the financial cards', async () => {
     const fixture = await createDashboard(
-      of({ income: 500, expenses: 100, balance: 400, transactionCount: 2 }),
+      of(summary(500, 100, 400, 2)),
       throwError(() => new Error('Relatório indisponível'))
     );
     const element = fixture.nativeElement as HTMLElement;
@@ -96,7 +105,7 @@ describe('DashboardComponent', () => {
 
   it('renders current-month expenses by category with values and percentages', async () => {
     const fixture = await createDashboard(
-      of({ income: 500, expenses: 200, balance: 300, transactionCount: 2 }),
+      of(summary(500, 200, 300, 2)),
       of(KNOWN_MONTHS),
       of([
         { category: 'Casa', amount: 2641.52 },
@@ -114,7 +123,7 @@ describe('DashboardComponent', () => {
 
   it('shows an independent empty state when there are no category expenses', async () => {
     const fixture = await createDashboard(
-      of({ income: 500, expenses: 0, balance: 500, transactionCount: 1 }),
+      of(summary(500, 0, 500, 1)),
       of(KNOWN_MONTHS),
       of([])
     );
@@ -123,12 +132,49 @@ describe('DashboardComponent', () => {
       'Nenhuma despesa registrada no mês atual.'
     );
   });
+
+  it('reconciles the account with a Brazilian currency value', async () => {
+    const reconcile = vi.fn().mockReturnValue(of({
+      name: 'Conta principal',
+      availableBalance: 1874.02,
+      historicalResult: 4117.51,
+      savingsBalance: 1016.26,
+      isReconciled: true
+    }));
+    const fixture = await createDashboard(
+      of(summary(5559.87, 3432.19, 3101.25, 11)),
+      of(KNOWN_MONTHS),
+      of([]),
+      reconcile
+    );
+    const element = fixture.nativeElement as HTMLElement;
+
+    (element.querySelector('.balance-action') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    const input = element.querySelector('#current-balance') as HTMLInputElement;
+    input.value = '1.874,02';
+    input.dispatchEvent(new Event('input'));
+    (element.querySelector('.balance-form') as HTMLFormElement)
+      .dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+
+    expect(reconcile).toHaveBeenCalledWith(1874.02);
+    expect(element.textContent?.replace(/\s/g, ' ')).toContain('R$ 1.874,02');
+    expect(element.textContent).toContain('Saldo da conta atualizado com sucesso.');
+  });
 });
 
 async function createDashboard(
   response: Observable<FinancialSummary>,
   monthlyResponse: Observable<MonthlyFinancialData[]> = of(KNOWN_MONTHS),
-  categoryResponse: Observable<ExpenseByCategory[]> = of([])
+  categoryResponse: Observable<ExpenseByCategory[]> = of([]),
+  reconcile: (balance: number) => Observable<unknown> = () => of({
+    name: 'Conta principal',
+    availableBalance: 1874.02,
+    historicalResult: 4117.51,
+    savingsBalance: 1016.26,
+    isReconciled: true
+  })
 ): Promise<ComponentFixture<DashboardComponent>> {
   TestBed.resetTestingModule();
   await TestBed.configureTestingModule({
@@ -140,12 +186,34 @@ async function createDashboard(
         getLastSixMonths: () => monthlyResponse,
         getCurrentMonthExpensesByCategory: () => categoryResponse
       }
+    }, {
+      provide: FinancialAccountService,
+      useValue: {
+        reconcile
+      }
     }]
   }).compileComponents();
 
   const fixture = TestBed.createComponent(DashboardComponent);
   fixture.detectChanges();
   return fixture;
+}
+
+function summary(
+  income: number,
+  expenses: number,
+  availableBalance: number,
+  transactionCount: number
+): FinancialSummary {
+  return {
+    income,
+    expenses,
+    availableBalance,
+    historicalResult: availableBalance,
+    savingsBalance: 0,
+    accountIsReconciled: true,
+    transactionCount
+  };
 }
 
 const KNOWN_MONTHS: MonthlyFinancialData[] = [

@@ -23,6 +23,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 {
     public DbSet<Category> Categories { get; set; } = null!;
     public DbSet<Transaction> Transactions { get; set; } = null!;
+    public DbSet<FinancialAccount> FinancialAccounts { get; set; } = null!;
     public DbSet<Order> Orders { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

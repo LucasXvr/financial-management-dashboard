@@ -146,6 +146,8 @@ namespace Fin.Api.Common.Api
                 .Services
                 .AddTransient<ITransactionHandler, TransactionHandler>();
 
+            builder.Services.AddTransient<IFinancialAccountHandler, FinancialAccountHandler>();
+
             builder.Services.AddTransient<ITransactionExportService, TransactionExportService>();
 
             builder.Services.AddSingleton(TimeProvider.System);
@@ -163,13 +165,36 @@ namespace Fin.Api.Common.Api
             builder.Services.AddRateLimiter(options =>
             {
                 options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-                options.AddFixedWindowLimiter("password-recovery", limiter =>
-                {
-                    limiter.PermitLimit = 5;
-                    limiter.Window = TimeSpan.FromMinutes(1);
-                    limiter.QueueLimit = 0;
-                    limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                });
+                options.AddPolicy("authentication", context =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 10,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueLimit = 0,
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                        }));
+                options.AddPolicy("registration", context =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 5,
+                            Window = TimeSpan.FromHours(1),
+                            QueueLimit = 0,
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                        }));
+                options.AddPolicy("password-recovery", context =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 5,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueLimit = 0,
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                        }));
             });
 
             builder.Services.AddIdentity<User, IdentityRole<long>>(options => 
