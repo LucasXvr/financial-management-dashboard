@@ -138,6 +138,12 @@
   .auth-card p, .auth-links { color: #cbd5e1; }
   .auth-card input { border-color: #475569; background: #0f172a; color: #f8fafc; }
   .auth-card input::placeholder { color: #94a3b8; }
+  .auth-card .error {
+    border-color: #f87171;
+    background: #450a0a;
+    color: #fecaca;
+    font-weight: 600;
+  }
   .auth-links { border-color: #334155; }
 }
 
