@@ -172,6 +172,15 @@ describe('TransactionsComponent', () => {
     HTMLAnchorElement.prototype.click = originalClick;
   });
 
+  it('loads the current civil year by default', () => {
+    const currentYear = new Date().getFullYear().toString();
+
+    expect(transactionService.lastRequestedPeriod).toEqual({
+      startDate: `${currentYear}-01-01`,
+      endDate: `${currentYear}-12-31`
+    });
+  });
+
   it('shows an error and releases the button when Excel export fails', () => {
     transactionService.failExport = true;
     const component = fixture.componentInstance as unknown as {

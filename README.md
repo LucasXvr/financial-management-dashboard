@@ -1,8 +1,8 @@
 # Financial Management Dashboard
 
-Aplicação de gerenciamento financeiro pessoal criada como projeto de portfólio full stack com **ASP.NET Core 8**, **Angular**, **React** e **SQL Server**.
+Aplicação de gerenciamento financeiro pessoal criada como projeto de portfólio full stack com **ASP.NET Core 8**, **Angular** e **SQL Server**.
 
-O frontend original foi construído em React e está sendo migrado gradualmente para Angular. A aplicação Angular já oferece autenticação, dashboard financeiro e gerenciamento de categorias e transações integrados à API.
+A aplicação oferece autenticação, dashboard financeiro e gerenciamento de categorias e transações integrados à API.
 
 ## Estado atual
 
@@ -32,10 +32,6 @@ O frontend original foi construído em React e está sendo migrado gradualmente 
 - Atualização da interface em modo sem Zone.js.
 - Mensagem de erro ao tentar excluir uma categoria vinculada a transações.
 
-### Migração pendente
-
-- Demais recursos ainda presentes apenas no frontend React.
-
 ## Regras de segurança e integridade
 
 - As rotas financeiras exigem autenticação.
@@ -64,13 +60,6 @@ O frontend original foi construído em React e está sendo migrado gradualmente 
 - HttpClient e interceptors funcionais
 - Vitest
 
-### Frontend React
-
-- React, TypeScript e Vite
-- Tailwind CSS
-- React Router, Axios e React Query
-- Chart.js
-
 ### Infraestrutura
 
 - Docker e Docker Compose
@@ -83,8 +72,7 @@ FinancialManagementDashboard/
 ├── Fin.Api/             # API, handlers, endpoints e migrations
 ├── Fin.Api.Tests/       # Testes de integração da API
 ├── Fin.Core/            # Modelos, contratos, enums e interfaces
-├── Fin.Web.Angular/     # Frontend em migração ativa
-├── Fin.Web.React/       # Frontend React original
+├── Fin.Web.Angular/     # Frontend Angular
 ├── docker-compose.yml
 └── FinancialManagementDashboard.sln
 ```
