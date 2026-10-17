@@ -204,10 +204,14 @@ Configure os valores locais por variáveis de ambiente ou em `Fin.Api/appsetting
 
 ## Testes
 
+O CI é executado em pull requests direcionados à `main` e em pushes na `main`. Antes de abrir um pull request, reproduza localmente as verificações obrigatórias abaixo.
+
 ### API
 
 ```bash
-dotnet test FinancialManagementDashboard.sln
+dotnet restore FinancialManagementDashboard.sln
+dotnet build FinancialManagementDashboard.sln --configuration Release --no-restore
+dotnet test FinancialManagementDashboard.sln --configuration Release --no-build
 ```
 
 Alternativa com SDK .NET 8 em Docker:
@@ -223,9 +227,21 @@ Os testes atuais verificam o isolamento de categorias, transações e saldos ent
 
 ```bash
 cd Fin.Web.Angular
+npm ci
 npm test -- --watch=false
-npm run build
+npm run build:production
 ```
+
+O Angular usa Node.js 22, npm 11.9.0 e o `package-lock.json` por meio de `npm ci`. A API e os testes usam o SDK .NET 8.
+
+### Checks de proteção da `main`
+
+Configure estes nomes exatos como checks obrigatórios na proteção da branch ou no ruleset do GitHub:
+
+- `api-build-test`
+- `angular-build-test`
+
+O workflow não usa `continue-on-error`: qualquer falha de restauração, build ou teste encerra o respectivo job com erro. A existência desta documentação e do workflow não confirma que a proteção da branch esteja ativa; essa configuração deve ser verificada no GitHub após o push.
 
 ## Endpoints principais
 
@@ -274,7 +290,6 @@ A geração utiliza [ClosedXML](https://github.com/ClosedXML/ClosedXML), distrib
 - Adicionar testes HTTP e testes de jornada do usuário.
 - Evoluir os relatórios e filtros do dashboard.
 - Preparar configuração e observabilidade para publicação em produção.
-- Criar pipeline de CI para build e testes.
 
 ## Autor
 
