@@ -1,4 +1,4 @@
-name: Build and test
+name: Continuous integration
 
 on:
   pull_request:
@@ -11,28 +11,53 @@ permissions:
 
 jobs:
   api:
+    name: api-build-test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - run: dotnet restore FinancialManagementDashboard.sln
-      - run: dotnet build FinancialManagementDashboard.sln --configuration Release --no-restore
-      - run: dotnet test FinancialManagementDashboard.sln --configuration Release --no-build
+
+      - name: Restore .NET dependencies
+        run: dotnet restore FinancialManagementDashboard.sln
+
+      - name: Build .NET
+        run: dotnet build FinancialManagementDashboard.sln --configuration Release --no-restore
+
+      - name: Test .NET
+        run: dotnet test FinancialManagementDashboard.sln --configuration Release --no-build
 
   angular:
+    name: angular-build-test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: Fin.Web.Angular
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: Fin.Web.Angular/package-lock.json
-      - run: npm ci
-      - run: npm test -- --watch=false
-      - run: npm run build:production
+
+      - name: Use project npm version
+        run: npm install --global npm@11.9.0
+
+      - name: Install Angular dependencies from lockfile
+        run: npm ci
+
+      - name: Test Angular
+        run: npm test -- --watch=false
+
+      - name: Build Angular production bundle
+        run: npm run build:production

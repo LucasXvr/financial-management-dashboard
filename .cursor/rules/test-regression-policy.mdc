@@ -1,0 +1,36 @@
+---
+description: Política permanente de testes automatizados e prevenção de regressões
+alwaysApply: true
+---
+
+# Testes e regressão contínua
+
+Proteja permanentemente regras de negócio e bugs corrigidos com uma suíte de testes cumulativa.
+
+## Implementação
+
+1. Toda correção de bug deve gerar um teste automatizado de regressão, quando tecnicamente viável.
+2. Preferencialmente, crie primeiro um teste que reproduza o bug e falhe pelo motivo esperado.
+3. Após a correção, confirme que o novo teste e os testes existentes passam.
+4. Incorpore o teste à suíte permanente do projeto.
+5. Nunca exclua, ignore, enfraqueça ou altere testes somente para aprovar uma mudança.
+6. Quando uma regra mudar intencionalmente, atualize os testes afetados e documente a justificativa.
+7. Toda funcionalidade nova deve incluir testes adequados às regras implementadas.
+8. Antes de concluir uma tarefa, execute os testes relevantes.
+9. Antes de publicar, execute toda a suíte de regressão e bloqueie a publicação se houver falhas obrigatórias.
+10. Se a automação não for possível, documente a limitação, a validação manual e o risco residual.
+11. Quando possível, associe o teste ao identificador do bug, requisito ou regra de negócio.
+12. Mantenha os testes independentes, repetíveis e livres de dados ou estados externos instáveis.
+
+## Relatório final obrigatório
+
+Ao finalizar alterações, informe:
+
+- alterações realizadas;
+- bugs corrigidos;
+- testes de regressão criados ou atualizados;
+- testes executados e resultados;
+- testes não executados e justificativa;
+- riscos ou limitações identificados.
+
+Nenhuma correção está completa sem validação e proteção contra regressão, salvo exceção técnica documentada.
